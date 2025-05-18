@@ -1,0 +1,530 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block title %}{{ auction.title }} - Mazadi{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<div class="bg-gray-100 py-4 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'home' %}" class="text-gray-500 hover:text-gray-700 transition duration-300">
+                            <i class="fas fa-home"></i>
+                            <span class="sr-only">Home</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                        <a href="{% url 'index' %}" class="ml-4 text-gray-500 hover:text-gray-700 transition duration-300">Auctions</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                        <a href="{% url 'page' auction.category %}" class="ml-4 text-gray-500 hover:text-gray-700 transition duration-300">{{ auction.category }}</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                        <span class="ml-4 text-gray-700 font-medium truncate max-w-xs">{{ auction.title }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+    <!-- Auction Status Banner -->
+    {% if auction.is_close %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 flex items-center">
+            <div class="flex-shrink-0">
+                <i class="fas fa-gavel text-red-500 text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">This auction has ended</h3>
+                <div class="mt-1 text-sm text-red-700">
+                    {% if user.id == bid.user.id %}
+                        Congratulations! You won this auction with a bid of ${{ bid.amount }}.
+                    {% else %}
+                        This auction was won by {{ bid.user.username }} with a bid of ${{ bid.amount }}.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% elif auction.is_close == False %}
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-8 flex items-center">
+            <div class="flex-shrink-0">
+                <i class="fas fa-clock text-green-500 text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-green-800">Active Auction</h3>
+                <div class="mt-1 text-sm text-green-700">
+                    This auction is currently active. Current bid: ${{ bid.amount }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+        <!-- Left Column - Image Gallery -->
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                <!-- Main Image with Zoom Feature -->
+                <div class="relative h-96 bg-gray-100 overflow-hidden" id="image-container">
+                    <div class="image-zoom-container w-full h-full relative cursor-zoom-in">
+                        {% if auction.image %}
+                            <img src="{{ auction.image.url }}"
+                                 alt="{{ auction.title }}"
+                                 id="zoomable-image"
+                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out">
+                        {% elif auction.image_url %}
+                            <img src="{{ auction.image_url }}"
+                                 alt="{{ auction.title }}"
+                                 id="zoomable-image"
+                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out">
+                        {% else %}
+                            <img src="https://via.placeholder.com/800x600?text=No+Image"
+                                 alt="{{ auction.title }}"
+                                 id="zoomable-image"
+                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out">
+                        {% endif %}
+
+                        <!-- Zoom Lens -->
+                        <div id="zoom-lens" class="hidden absolute border-2 border-primary-300 bg-white bg-opacity-20 pointer-events-none"></div>
+
+                        <!-- Zoom Result -->
+                        <div id="zoom-result" class="hidden absolute top-0 left-0 right-0 bottom-0 bg-contain bg-no-repeat bg-center z-10"></div>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <div class="absolute top-4 right-4 z-20">
+                        {% if auction.is_close %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Closed</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Zoom Instructions -->
+                    <div class="absolute bottom-4 left-4 z-20 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-md flex items-center">
+                        <i class="fas fa-search-plus mr-1"></i>
+                        <span>Click to zoom</span>
+                    </div>
+                </div>
+
+                <!-- Thumbnail Gallery (Placeholder for future enhancement) -->
+                <div class="flex p-2 bg-gray-50 border-t border-gray-200">
+                    <div class="w-20 h-20 border border-primary-300 rounded overflow-hidden">
+                        {% if auction.image %}
+                            <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                        {% elif auction.image_url %}
+                            <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="https://via.placeholder.com/800x600?text=No+Image" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="w-20 h-20 mx-2 border border-gray-200 rounded overflow-hidden opacity-50 cursor-pointer hover:opacity-100 transition duration-300">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                            <i class="fas fa-plus text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="w-20 h-20 border border-gray-200 rounded overflow-hidden opacity-50 cursor-pointer hover:opacity-100 transition duration-300">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                            <i class="fas fa-plus text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seller Information -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 mt-6">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center">
+                    <i class="fas fa-user-circle text-gray-500 mr-2"></i>
+                    <h3 class="text-lg font-medium">Seller Information</h3>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-lg font-medium text-gray-900">{{ auction.user.first_name }} {{ auction.user.last_name }}</h4>
+                            <p class="text-gray-500">Member since {{ auction.user.date_joined|date:"F Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Auction Details -->
+        <div class="lg:col-span-2">
+            <!-- Auction Details Card -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 sticky top-24">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ auction.title }}</h1>
+                        {% if user.id == auction.user.id %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">Your Listing</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Price -->
+                    <div class="flex items-baseline mb-6">
+                        <span class="text-3xl font-bold text-primary-600">${{ auction.price }}</span>
+                        <span class="ml-2 text-sm text-gray-500">Current Price</span>
+                    </div>
+
+                    <!-- Bid Information -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-700 font-medium">Current Bid:</span>
+                            <span class="text-lg font-bold text-primary-600">${{ bid.amount }}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-700 font-medium">Bid Placed By:</span>
+                            <span class="text-gray-900">{{ bid.user.first_name }} {{ bid.user.last_name }}</span>
+                        </div>
+
+                        {% if auction.is_close == False and user.is_authenticated %}
+                            <form action="{% url 'bid' %}" method="post" class="space-y-3">
+                                {% csrf_token %}
+                                <div>
+                                    {{ BidForm }}
+                                </div>
+                                <input type="hidden" name="auction_id" value="{{ auction.id }}">
+                                <button type="submit" class="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                    <i class="fas fa-gavel mr-2"></i> Place Bid
+                                </button>
+                            </form>
+                        {% elif auction.is_close == False and not user.is_authenticated %}
+                            <div class="text-center py-2">
+                                <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 font-medium">
+                                    Log in to place a bid
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">Product Details</h3>
+                        <div class="space-y-2 text-gray-700">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Category:</span>
+                                <span class="font-medium">{{ auction.category }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Listed On:</span>
+                                <span class="font-medium">{{ auction.created_at|date:"F d, Y" }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Status:</span>
+                                <span class="font-medium">
+                                    {% if auction.is_close %}
+                                        Closed
+                                    {% else %}
+                                        Active
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">Description</h3>
+                        <p class="text-gray-700">{{ auction.description }}</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        {% if not watchlisted and user.is_authenticated %}
+                            <form action="{% url 'watchlist' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="auction_id" value="{{ auction.id }}">
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 border-2 border-primary-600 text-primary-600 font-medium rounded-lg hover:bg-primary-600 hover:text-white transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                                    <i class="far fa-heart mr-2 transition-transform duration-300 group-hover:scale-110"></i> Add to Watchlist
+                                </button>
+                            </form>
+                        {% elif watchlisted %}
+                            <form action="{% url 'remove' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="auction_id" value="{{ auction.id }}">
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 border-2 border-red-600 text-red-600 font-medium rounded-lg hover:bg-red-600 hover:text-white transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                    <i class="fas fa-heart mr-2 animate-pulse-custom"></i> Remove from Watchlist
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <!-- Close Auction Button (Only for owner) -->
+                        {% if user.id == auction.user.id and auction.is_close == False %}
+                            <form action="{% url 'close' auction.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                    <i class="fas fa-times-circle mr-2"></i> Close Auction
+                                </button>
+                            </form>
+                            <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded mt-3">
+                                <p class="text-sm text-red-600 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Warning: This action cannot be undone.
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 mb-8">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center">
+            <i class="far fa-comments text-gray-500 mr-2"></i>
+            <h3 class="text-lg font-medium">Comments ({{ comments.count }})</h3>
+        </div>
+
+        <!-- Comments List -->
+        <div class="divide-y divide-gray-200">
+            {% for comment in comments %}
+                <div class="p-6">
+                    <div class="flex space-x-3">
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ comment.user.first_name }} {{ comment.user.last_name }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ comment.created_at|date:"F d, Y" }} at {{ comment.created_at|time:"g:i A" }}
+                            </p>
+                            <div class="mt-2 text-gray-700">
+                                {{ comment.message }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="p-6 text-center">
+                    <p class="text-gray-500 italic">No comments yet. Be the first to comment!</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Comment Form -->
+        {% if auction.is_close == False and user.is_authenticated %}
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <form action="{% url 'comment' %}" method="post" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        {{ CommentForm }}
+                        <input type="hidden" name="auction_id" value="{{ auction.id }}">
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="far fa-paper-plane mr-2"></i> Post Comment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        {% elif not user.is_authenticated %}
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
+                <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 font-medium">
+                    Log in to post a comment
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Related Auctions -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Related Auctions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {% for related in related_auctions %}
+            <div class="animate-slide-in" style="animation-delay: {{ forloop.counter0 }}00ms">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-500 transform hover:-translate-y-2 hover:shadow-xl h-full flex flex-col group">
+                    <!-- Image container with enhanced hover effects -->
+                    <div class="h-48 overflow-hidden relative">
+                        <!-- Status badge -->
+                        <div class="absolute top-3 right-3 z-10">
+                            {% if related.is_close %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Closed</span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Image with hover zoom effect -->
+                        <div class="w-full h-full overflow-hidden group">
+                            {% if related.image %}
+                                <img src="{{ related.image.url }}" alt="{{ related.title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                            {% elif related.image_url %}
+                                <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                            {% else %}
+                                <img src="https://via.placeholder.com/800x600?text=No+Image" alt="{{ related.title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Content with enhanced styling -->
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="mb-3">
+                            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-300">{{ related.title }}</h3>
+                            <p class="text-gray-600 mt-2 line-clamp-2">{{ related.description }}</p>
+                        </div>
+
+                        <div class="mt-auto">
+                            <!-- Price with animation -->
+                            <div class="flex justify-end mb-4">
+                                <div class="bg-primary-50 px-3 py-1 rounded-full">
+                                    <span class="text-lg font-bold text-primary-700 group-hover:text-primary-800 transition-colors duration-300 inline-block transform group-hover:scale-110 transition-transform">
+                                        ${{ related.price }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- CTA Button with enhanced hover effect -->
+                            <a href="{% url 'auction' related.id %}" class="relative overflow-hidden block w-full text-center px-4 py-3 border-2 border-primary-600 text-primary-600 rounded-md bg-transparent hover:text-white transition-all duration-300 group-hover:shadow-md">
+                                <span class="relative z-10 flex items-center justify-center">
+                                    <span>View Details</span>
+                                    <i class="fas fa-arrow-right ml-2 transform transition-transform duration-300 group-hover:translate-x-1"></i>
+                                </span>
+                                <div class="absolute inset-0 w-full h-full bg-primary-600 transform -translate-y-full transition-transform duration-300 group-hover:translate-y-0"></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <div class="col-span-full">
+                    <div class="bg-gray-50 rounded-lg p-8 text-center">
+                        <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">No Related Auctions Found</h3>
+                        <p class="text-gray-500">We couldn't find any other active auctions in this category.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get elements
+        const container = document.getElementById('image-container');
+        const img = document.getElementById('zoomable-image');
+        const lens = document.getElementById('zoom-lens');
+        const result = document.getElementById('zoom-result');
+
+        // Variables
+        let isZoomed = false;
+        const zoomLevel = 2.5; // Zoom magnification level
+
+        // Set lens size (adjust as needed)
+        const lensWidth = 100;
+        const lensHeight = 100;
+
+        // Initialize zoom functionality
+        function initZoom() {
+            if (!img) return;
+
+            // Toggle zoom on click
+            container.addEventListener('click', function(e) {
+                if (!isZoomed) {
+                    // Enable zoom mode
+                    isZoomed = true;
+                    lens.classList.remove('hidden');
+                    result.classList.remove('hidden');
+                    result.style.backgroundImage = `url('${img.src}')`;
+                    container.classList.add('cursor-crosshair');
+                    container.classList.remove('cursor-zoom-in');
+
+                    // Set initial lens position
+                    moveLens(e);
+                } else {
+                    // Disable zoom mode
+                    isZoomed = false;
+                    lens.classList.add('hidden');
+                    result.classList.add('hidden');
+                    container.classList.remove('cursor-crosshair');
+                    container.classList.add('cursor-zoom-in');
+                }
+            });
+
+            // Move lens on mousemove when zoomed
+            container.addEventListener('mousemove', function(e) {
+                if (isZoomed) {
+                    moveLens(e);
+                }
+            });
+
+            // Disable zoom when mouse leaves container
+            container.addEventListener('mouseleave', function() {
+                isZoomed = false;
+                lens.classList.add('hidden');
+                result.classList.add('hidden');
+                container.classList.remove('cursor-crosshair');
+                container.classList.add('cursor-zoom-in');
+            });
+        }
+
+        // Move lens and update zoom result
+        function moveLens(e) {
+            // Prevent default behavior
+            e.preventDefault();
+
+            // Get cursor position
+            const pos = getCursorPos(e);
+
+            // Calculate lens position
+            let x = pos.x - (lensWidth / 2);
+            let y = pos.y - (lensHeight / 2);
+
+            // Prevent lens from going outside the image
+            if (x > img.width - lensWidth) x = img.width - lensWidth;
+            if (x < 0) x = 0;
+            if (y > img.height - lensHeight) y = img.height - lensHeight;
+            if (y < 0) y = 0;
+
+            // Set lens position
+            lens.style.left = x + 'px';
+            lens.style.top = y + 'px';
+            lens.style.width = lensWidth + 'px';
+            lens.style.height = lensHeight + 'px';
+
+            // Calculate and set background position for result
+            const ratio = zoomLevel;
+            const bgX = x * ratio;
+            const bgY = y * ratio;
+
+            result.style.backgroundSize = (img.width * ratio) + 'px ' + (img.height * ratio) + 'px';
+            result.style.backgroundPosition = '-' + bgX + 'px ' + '-' + bgY + 'px';
+        }
+
+        // Get cursor position relative to image
+        function getCursorPos(e) {
+            const rect = img.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            return { x, y };
+        }
+
+        // Initialize zoom
+        initZoom();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block title %}All Auctions - Mazadi{% endblock %}
+
+{% block extra_head %}
+<script>
+    // Add smooth scroll behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover animation for cards
+        const cards = document.querySelectorAll('.animate-slide-in');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+    <!-- Enhanced Page Header with Animation -->
+    <div class="bg-gradient-to-r from-primary-600 to-primary-800 py-16 relative overflow-hidden">
+        <!-- Animated background elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-8 -left-8 w-64 h-64 bg-white opacity-5 rounded-full transform rotate-12 animate-pulse-slow"></div>
+            <div class="absolute top-1/2 -right-16 w-80 h-80 bg-white opacity-5 rounded-full transform -rotate-12 animate-pulse-slower"></div>
+            <div class="absolute bottom-0 left-1/4 w-40 h-40 bg-white opacity-5 rounded-full transform animate-pulse"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold text-white sm:text-5xl lg:text-6xl animate-fade-in-up">
+                    <span class="inline-block transform hover:scale-105 transition-transform duration-300">Browse All Auctions</span>
+                </h1>
+                <p class="mt-6 max-w-2xl mx-auto text-xl text-primary-100 animate-fade-in" style="animation-delay: 200ms;">
+                    Discover unique items from sellers around the world
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auctions Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 mt-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for auction in auctions %}
+            <div class="animate-slide-in" style="animation-delay: {{ forloop.counter0 }}00ms">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-500 transform hover:-translate-y-2 hover:shadow-xl h-full flex flex-col group">
+                    <!-- Image container with enhanced hover effects -->
+                    <div class="h-64 overflow-hidden relative">
+                        <!-- Category badge -->
+                        <div class="absolute top-3 left-3 z-10">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white bg-opacity-90 text-primary-700 shadow-sm transform transition-transform duration-300 group-hover:scale-110">
+                                <i class="fas fa-tag mr-1"></i> {{ auction.category }}
+                            </span>
+                        </div>
+
+                        <!-- Status badge -->
+                        <div class="absolute top-3 right-3 z-10">
+                            {% if auction.is_close %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 shadow-sm transform transition-transform duration-300 group-hover:scale-110">
+                                    <i class="fas fa-times-circle mr-1"></i> Closed
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 shadow-sm transform transition-transform duration-300 group-hover:scale-110">
+                                    <i class="fas fa-check-circle mr-1"></i> Active
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Image with enhanced hover effect -->
+                        <img
+                            src="{{ auction.image_url }}"
+                            class="w-full h-full object-cover transition-all duration-700 ease-in-out transform group-hover:scale-110 filter group-hover:brightness-105"
+                            alt="{{ auction.title }}"
+                            onerror="this.src=getPlaceholderImage('{{ auction.category }}')"
+                        >
+
+                        <!-- Overlay gradient on hover -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+                    </div>
+
+                    <!-- Content with enhanced styling -->
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="mb-3">
+                            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-300">{{ auction.title }}</h3>
+                            <p class="text-gray-600 mt-2 line-clamp-2">{{ auction.description }}</p>
+                        </div>
+
+                        <div class="mt-auto">
+                            <!-- Price with animation -->
+                            <div class="flex justify-end mb-4">
+                                <div class="bg-primary-50 px-3 py-1 rounded-full">
+                                    <span class="text-lg font-bold text-primary-700 group-hover:text-primary-800 transition-colors duration-300 inline-block transform group-hover:scale-110 transition-transform">
+                                        ${{ auction.price }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- CTA Button with enhanced hover effect -->
+                            <a href="{% url 'auction' auction.id %}" class="relative overflow-hidden block w-full text-center px-4 py-3 border-2 border-primary-600 text-primary-600 rounded-md bg-transparent hover:text-white transition-all duration-300 group-hover:shadow-md">
+                                <span class="relative z-10 flex items-center justify-center">
+                                    <span>View Details</span>
+                                    <i class="fas fa-arrow-right ml-2 transform transition-transform duration-300 group-hover:translate-x-1"></i>
+                                </span>
+                                <div class="absolute inset-0 w-full h-full bg-primary-600 transform -translate-y-full transition-transform duration-300 group-hover:translate-y-0"></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <div class="col-span-full animate-fade-in">
+                    <div class="bg-white border border-gray-200 p-8 rounded-lg shadow-md text-center max-w-2xl mx-auto">
+                        <div class="mb-6">
+                            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-700 hover:rotate-12">
+                                <i class="fas fa-gavel text-yellow-500 text-3xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">No Auctions Found</h3>
+                            <p class="text-gray-600 max-w-md mx-auto">
+                                There are no auctions listed yet. Be the first to create one and start the bidding!
+                            </p>
+                        </div>
+
+                        {% if user.is_authenticated %}
+                            <div class="mt-6">
+                                <a href="{% url 'create' %}" class="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                    <i class="fas fa-plus-circle mr-2"></i> Create Your First Auction
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="mt-6 space-y-4">
+                                <p class="text-gray-600">Sign in to create your first auction</p>
+                                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <a href="{% url 'login' %}" class="inline-flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md shadow-sm transition-all duration-300 hover:bg-gray-50 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        <i class="fas fa-sign-in-alt mr-2"></i> Log In
+                                    </a>
+                                    <a href="{% url 'register' %}" class="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        <i class="fas fa-user-plus mr-2"></i> Register
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Enhanced Pagination with Animations -->
+        {% if auctions %}
+            <div class="mt-16 flex flex-col items-center">
+                <div class="text-sm text-gray-500 mb-4">
+                    Showing <span class="font-medium">1</span> to <span class="font-medium">12</span> of <span class="font-medium">48</span> results
+                </div>
+
+                <nav class="inline-flex rounded-lg shadow-md overflow-hidden" aria-label="Pagination">
+                    <!-- Previous button with enhanced hover effect -->
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border border-gray-200 bg-white text-gray-500 transition-all duration-300 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 transform hover:-translate-y-1 hover:shadow-md">
+                        <span class="sr-only">Previous</span>
+                        <i class="fas fa-chevron-left text-sm"></i>
+                    </a>
+
+                    <!-- Page numbers with enhanced hover effects -->
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-gray-200 bg-white text-sm font-medium text-gray-700 transition-all duration-300 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 transform hover:-translate-y-1 hover:shadow-md">1</a>
+
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-primary-200 bg-primary-50 text-sm font-medium text-primary-600 transition-all duration-300 transform -translate-y-1 shadow-md">2</a>
+
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-gray-200 bg-white text-sm font-medium text-gray-700 transition-all duration-300 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 transform hover:-translate-y-1 hover:shadow-md">3</a>
+
+                    <span class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-gray-200 bg-white text-sm font-medium text-gray-400">...</span>
+
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-gray-200 bg-white text-sm font-medium text-gray-700 transition-all duration-300 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 transform hover:-translate-y-1 hover:shadow-md">8</a>
+
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-gray-200 bg-white text-sm font-medium text-gray-700 transition-all duration-300 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 transform hover:-translate-y-1 hover:shadow-md">9</a>
+
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-gray-200 bg-white text-sm font-medium text-gray-700 transition-all duration-300 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 transform hover:-translate-y-1 hover:shadow-md">10</a>
+
+                    <!-- Next button with enhanced hover effect -->
+                    <a href="#" class="relative inline-flex items-center justify-center w-10 h-10 border-t border-b border-r border-gray-200 bg-white text-gray-500 transition-all duration-300 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 transform hover:-translate-y-1 hover:shadow-md">
+                        <span class="sr-only">Next</span>
+                        <i class="fas fa-chevron-right text-sm"></i>
+                    </a>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

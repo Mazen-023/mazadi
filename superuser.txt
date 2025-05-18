@@ -1,0 +1,3 @@
+Username: Admin
+Email address: Admin123@example.com
+Password: Admin123
