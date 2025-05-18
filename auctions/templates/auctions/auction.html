@@ -5,13 +5,13 @@
 
 {% block body %}
 <!-- Breadcrumb -->
-<div class="bg-gray-100 py-4 border-b border-gray-200">
+<div class="bg-gradient-to-r from-gray-50 to-gray-100 py-4 border-b border-gray-200 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="flex items-center space-x-4">
                 <li>
                     <div>
-                        <a href="{% url 'home' %}" class="text-gray-500 hover:text-gray-700 transition duration-300">
+                        <a href="{% url 'home' %}" class="text-gray-500 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 inline-block">
                             <i class="fas fa-home"></i>
                             <span class="sr-only">Home</span>
                         </a>
@@ -19,20 +19,27 @@
                 </li>
                 <li>
                     <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                        <a href="{% url 'index' %}" class="ml-4 text-gray-500 hover:text-gray-700 transition duration-300">Auctions</a>
+                        <i class="fas fa-chevron-right text-gray-400 text-xs animate-pulse-slow"></i>
+                        <a href="{% url 'index' %}" class="ml-4 text-gray-500 hover:text-primary-600 transition-all duration-300 hover:underline">Auctions</a>
                     </div>
                 </li>
                 <li>
                     <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                        <a href="{% url 'page' auction.category %}" class="ml-4 text-gray-500 hover:text-gray-700 transition duration-300">{{ auction.category }}</a>
+                        <i class="fas fa-chevron-right text-gray-400 text-xs animate-pulse-slow"></i>
+                        <a href="{% url 'page' auction.category %}" class="ml-4 text-gray-500 hover:text-primary-600 transition-all duration-300 hover:underline">
+                            <span class="inline-flex items-center">
+                                <i class="fas fa-tag text-xs mr-1"></i>
+                                {{ auction.category }}
+                            </span>
+                        </a>
                     </div>
                 </li>
                 <li>
                     <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                        <span class="ml-4 text-gray-700 font-medium truncate max-w-xs">{{ auction.title }}</span>
+                        <i class="fas fa-chevron-right text-gray-400 text-xs animate-pulse-slow"></i>
+                        <span class="ml-4 text-primary-700 font-medium truncate max-w-xs bg-primary-50 px-2 py-1 rounded-md">
+                            {{ auction.title }}
+                        </span>
                     </div>
                 </li>
             </ol>
@@ -144,21 +151,37 @@
             </div>
 
             <!-- Seller Information -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 mt-6">
-                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center">
-                    <i class="fas fa-user-circle text-gray-500 mr-2"></i>
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 mt-6 transform hover:shadow-md hover:-translate-y-1">
+                <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex items-center">
+                    <i class="fas fa-user-circle text-primary-500 mr-2"></i>
                     <h3 class="text-lg font-medium">Seller Information</h3>
                 </div>
                 <div class="p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                <i class="fas fa-user text-gray-500"></i>
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center transform transition-all duration-500 hover:scale-110 hover:rotate-6 group">
+                                <i class="fas fa-user text-primary-500 transition-all duration-500 group-hover:text-primary-600"></i>
                             </div>
                         </div>
-                        <div class="ml-4">
-                            <h4 class="text-lg font-medium text-gray-900">{{ auction.user.first_name }} {{ auction.user.last_name }}</h4>
-                            <p class="text-gray-500">Member since {{ auction.user.date_joined|date:"F Y" }}</p>
+                        <div class="ml-6">
+                            <h4 class="text-lg font-medium text-gray-900 flex items-center">
+                                {{ auction.user.first_name }} {{ auction.user.last_name }}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                                    <i class="fas fa-check-circle mr-1"></i> Verified Seller
+                                </span>
+                            </h4>
+                            <p class="text-gray-500 flex items-center mt-1">
+                                <i class="far fa-calendar-alt text-gray-400 mr-2"></i>
+                                Member since {{ auction.user.date_joined|date:"F Y" }}
+                            </p>
+                            <div class="mt-3 flex space-x-3">
+                                <button class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300 flex items-center">
+                                    <i class="far fa-envelope mr-1"></i> Contact
+                                </button>
+                                <button class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300 flex items-center">
+                                    <i class="far fa-star mr-1"></i> View Ratings
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -168,46 +191,59 @@
         <!-- Right Column - Auction Details -->
         <div class="lg:col-span-2">
             <!-- Auction Details Card -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 sticky top-24">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 sticky top-24 transform hover:shadow-md">
                 <div class="p-6">
                     <div class="flex justify-between items-start mb-4">
-                        <h1 class="text-2xl font-bold text-gray-900">{{ auction.title }}</h1>
+                        <h1 class="text-2xl font-bold text-gray-900 group">
+                            <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-800">{{ auction.title }}</span>
+                        </h1>
                         {% if user.id == auction.user.id %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">Your Listing</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 animate-pulse-slow">
+                                <i class="fas fa-user-check mr-1"></i> Your Listing
+                            </span>
                         {% endif %}
                     </div>
 
                     <!-- Price -->
-                    <div class="flex items-baseline mb-6">
-                        <span class="text-3xl font-bold text-primary-600">${{ auction.price }}</span>
+                    <div class="flex items-baseline mb-6 group">
+                        <span class="text-3xl font-bold text-primary-600 transition-all duration-300 group-hover:scale-105">${{ auction.price }}</span>
                         <span class="ml-2 text-sm text-gray-500">Current Price</span>
                     </div>
 
                     <!-- Bid Information -->
-                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-gray-700 font-medium">Current Bid:</span>
-                            <span class="text-lg font-bold text-primary-600">${{ bid.amount }}</span>
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-5 mb-6 shadow-inner transform transition-all duration-300 hover:shadow">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700 font-medium flex items-center">
+                                <i class="fas fa-gavel text-primary-500 mr-2"></i>Current Bid:
+                            </span>
+                            <span class="text-lg font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full">${{ bid.amount }}</span>
                         </div>
                         <div class="flex justify-between items-center mb-4">
-                            <span class="text-gray-700 font-medium">Bid Placed By:</span>
-                            <span class="text-gray-900">{{ bid.user.first_name }} {{ bid.user.last_name }}</span>
+                            <span class="text-gray-700 font-medium flex items-center">
+                                <i class="fas fa-user text-primary-500 mr-2"></i>Bid Placed By:
+                            </span>
+                            <span class="text-gray-900 font-medium">{{ bid.user.first_name }} {{ bid.user.last_name }}</span>
                         </div>
 
                         {% if auction.is_close == False and user.is_authenticated %}
                             <form action="{% url 'bid' %}" method="post" class="space-y-3">
                                 {% csrf_token %}
-                                <div>
+                                <div class="relative group">
                                     {{ BidForm }}
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">$</span>
+                                    </div>
+                                    <div class="absolute inset-0 border border-gray-300 border-opacity-0 rounded-md group-focus-within:border-primary-500 group-focus-within:border-opacity-100 transition-all duration-300 pointer-events-none"></div>
                                 </div>
                                 <input type="hidden" name="auction_id" value="{{ auction.id }}">
-                                <button type="submit" class="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                                    <i class="fas fa-gavel mr-2"></i> Place Bid
+                                <button type="submit" class="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-md shadow-sm transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 group">
+                                    <i class="fas fa-gavel mr-2 transition-transform duration-300 group-hover:rotate-12"></i> Place Bid
                                 </button>
                             </form>
                         {% elif auction.is_close == False and not user.is_authenticated %}
-                            <div class="text-center py-2">
-                                <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 font-medium">
+                            <div class="text-center py-3 bg-primary-50 rounded-md">
+                                <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 font-medium inline-flex items-center group">
+                                    <i class="fas fa-sign-in-alt mr-2 transition-transform duration-300 group-hover:translate-x-[-2px]"></i>
                                     Log in to place a bid
                                 </a>
                             </div>
@@ -216,23 +252,34 @@
 
                     <!-- Product Details -->
                     <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-3">Product Details</h3>
-                        <div class="space-y-2 text-gray-700">
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Category:</span>
-                                <span class="font-medium">{{ auction.category }}</span>
+                        <h3 class="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                            <i class="fas fa-info-circle text-primary-500 mr-2"></i>Product Details
+                        </h3>
+                        <div class="space-y-3 text-gray-700 bg-gray-50 p-4 rounded-lg">
+                            <div class="flex justify-between items-center border-b border-gray-200 pb-2 group">
+                                <span class="text-gray-500 flex items-center">
+                                    <i class="fas fa-tag text-gray-400 mr-2 transition-transform duration-300 group-hover:rotate-12"></i>
+                                    Category:
+                                </span>
+                                <span class="font-medium text-primary-700 transition-colors duration-300 group-hover:text-primary-600">{{ auction.category }}</span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Listed On:</span>
+                            <div class="flex justify-between items-center border-b border-gray-200 pb-2 group">
+                                <span class="text-gray-500 flex items-center">
+                                    <i class="far fa-calendar-alt text-gray-400 mr-2 transition-transform duration-300 group-hover:scale-110"></i>
+                                    Listed On:
+                                </span>
                                 <span class="font-medium">{{ auction.created_at|date:"F d, Y" }}</span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Status:</span>
-                                <span class="font-medium">
+                            <div class="flex justify-between items-center group">
+                                <span class="text-gray-500 flex items-center">
+                                    <i class="fas fa-circle text-gray-400 mr-2 transition-all duration-300 group-hover:text-xs"></i>
+                                    Status:
+                                </span>
+                                <span class="font-medium {% if auction.is_close %}text-red-600{% else %}text-green-600{% endif %}">
                                     {% if auction.is_close %}
-                                        Closed
+                                        <i class="fas fa-times-circle mr-1"></i> Closed
                                     {% else %}
-                                        Active
+                                        <i class="fas fa-check-circle mr-1"></i> Active
                                     {% endif %}
                                 </span>
                             </div>
@@ -241,8 +288,12 @@
 
                     <!-- Description -->
                     <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-3">Description</h3>
-                        <p class="text-gray-700">{{ auction.description }}</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                            <i class="fas fa-align-left text-primary-500 mr-2"></i>Description
+                        </h3>
+                        <div class="text-gray-700 bg-gray-50 p-4 rounded-lg border-l-2 border-primary-300">
+                            {{ auction.description }}
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->
@@ -251,16 +302,16 @@
                             <form action="{% url 'watchlist' %}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="auction_id" value="{{ auction.id }}">
-                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 border-2 border-primary-600 text-primary-600 font-medium rounded-lg hover:bg-primary-600 hover:text-white transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                                    <i class="far fa-heart mr-2 transition-transform duration-300 group-hover:scale-110"></i> Add to Watchlist
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 border-2 border-primary-600 text-primary-600 font-medium rounded-lg hover:bg-primary-600 hover:text-white transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 group">
+                                    <i class="far fa-heart mr-2 transition-all duration-300 group-hover:scale-125 group-hover:animate-pulse"></i> Add to Watchlist
                                 </button>
                             </form>
                         {% elif watchlisted %}
                             <form action="{% url 'remove' %}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="auction_id" value="{{ auction.id }}">
-                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 border-2 border-red-600 text-red-600 font-medium rounded-lg hover:bg-red-600 hover:text-white transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                                    <i class="fas fa-heart mr-2 animate-pulse-custom"></i> Remove from Watchlist
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 border-2 border-red-600 text-red-600 font-medium rounded-lg hover:bg-red-600 hover:text-white transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 group">
+                                    <i class="fas fa-heart mr-2 animate-pulse"></i> Remove from Watchlist
                                 </button>
                             </form>
                         {% endif %}
@@ -269,11 +320,11 @@
                         {% if user.id == auction.user.id and auction.is_close == False %}
                             <form action="{% url 'close' auction.id %}" method="post">
                                 {% csrf_token %}
-                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                                    <i class="fas fa-times-circle mr-2"></i> Close Auction
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 group">
+                                    <i class="fas fa-times-circle mr-2 transition-transform duration-300 group-hover:rotate-12"></i> Close Auction
                                 </button>
                             </form>
-                            <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded mt-3">
+                            <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded mt-3 animate-pulse-slow">
                                 <p class="text-sm text-red-600 flex items-center">
                                     <i class="fas fa-exclamation-triangle mr-2"></i>
                                     Warning: This action cannot be undone.
@@ -287,37 +338,46 @@
     </div>
 
     <!-- Comments Section -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 mb-8">
-        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center">
-            <i class="far fa-comments text-gray-500 mr-2"></i>
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 mb-8 transform hover:shadow-md">
+        <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex items-center">
+            <i class="far fa-comments text-primary-500 mr-2 transform transition-all duration-300 group-hover:scale-110"></i>
             <h3 class="text-lg font-medium">Comments ({{ comments.count }})</h3>
         </div>
 
         <!-- Comments List -->
         <div class="divide-y divide-gray-200">
             {% for comment in comments %}
-                <div class="p-6">
+                <div class="p-6 hover:bg-gray-50 transition-colors duration-300 animate-fade-in" style="animation-delay: {{ forloop.counter0 }}00ms">
                     <div class="flex space-x-3">
                         <div class="flex-shrink-0">
-                            <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                <i class="fas fa-user text-gray-500"></i>
+                            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center transform transition-transform duration-300 hover:scale-110 hover:rotate-3">
+                                <i class="fas fa-user text-primary-500"></i>
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900">
+                            <p class="text-sm font-medium text-gray-900 flex items-center">
                                 {{ comment.user.first_name }} {{ comment.user.last_name }}
+                                {% if comment.user.id == auction.user.id %}
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800">
+                                        Seller
+                                    </span>
+                                {% endif %}
                             </p>
-                            <p class="text-sm text-gray-500">
+                            <p class="text-sm text-gray-500 flex items-center">
+                                <i class="far fa-clock text-gray-400 mr-1 text-xs"></i>
                                 {{ comment.created_at|date:"F d, Y" }} at {{ comment.created_at|time:"g:i A" }}
                             </p>
-                            <div class="mt-2 text-gray-700">
+                            <div class="mt-2 text-gray-700 p-3 bg-gray-50 rounded-lg border-l-2 border-primary-200">
                                 {{ comment.message }}
                             </div>
                         </div>
                     </div>
                 </div>
             {% empty %}
-                <div class="p-6 text-center">
+                <div class="p-12 text-center animate-fade-in">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                        <i class="far fa-comment-dots text-gray-400 text-2xl"></i>
+                    </div>
                     <p class="text-gray-500 italic">No comments yet. Be the first to comment!</p>
                 </div>
             {% endfor %}
@@ -325,23 +385,26 @@
 
         <!-- Comment Form -->
         {% if auction.is_close == False and user.is_authenticated %}
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div class="px-6 py-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
                 <form action="{% url 'comment' %}" method="post" class="space-y-4">
                     {% csrf_token %}
-                    <div>
+                    <div class="relative group">
                         {{ CommentForm }}
                         <input type="hidden" name="auction_id" value="{{ auction.id }}">
+                        <div class="absolute inset-0 border border-gray-300 border-opacity-0 rounded-md group-focus-within:border-primary-500 group-focus-within:border-opacity-100 transition-all duration-300 pointer-events-none"></div>
                     </div>
                     <div class="flex justify-end">
-                        <button type="submit" class="flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                            <i class="far fa-paper-plane mr-2"></i> Post Comment
+                        <button type="submit" class="flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="far fa-paper-plane mr-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+                            Post Comment
                         </button>
                     </div>
                 </form>
             </div>
         {% elif not user.is_authenticated %}
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
-                <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 font-medium">
+            <div class="px-6 py-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 text-center">
+                <a href="{% url 'login' %}" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium transition-colors duration-300 group">
+                    <i class="fas fa-sign-in-alt mr-2 transition-transform duration-300 group-hover:translate-x-[-2px]"></i>
                     Log in to post a comment
                 </a>
             </div>
@@ -373,7 +436,10 @@
                             {% elif related.image_url %}
                                 <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
                             {% else %}
-                                <img src="https://via.placeholder.com/800x600?text=No+Image" alt="{{ related.title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                <img src="https://via.placeholder.com/800x600?text=No+Image"
+                                     alt="{{ related.title }}"
+                                     class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                >
                             {% endif %}
                         </div>
                     </div>
@@ -423,6 +489,56 @@
 
 {% block scripts %}
 <script>
+    // Function to get category-specific placeholder images focused on electronics
+    function getPlaceholderImage(category) {
+        // Convert category to lowercase for case-insensitive matching
+        const categoryLower = category.toLowerCase();
+
+        // Electronics-focused category map with high-quality images
+        const categoryMap = {
+            // Main electronics categories
+            'smartphones': 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'tablets': 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'laptops': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'desktops': 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'monitors': 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'tvs': 'https://images.unsplash.com/photo-1593784991095-a205069470b6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'cameras': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'audio': 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'gaming': 'https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'accessories': 'https://images.unsplash.com/photo-1625480860249-be231d9b1bbd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'wearables': 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'networking': 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'storage': 'https://images.unsplash.com/photo-1597226051193-c5a5b5b4d24c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'components': 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+
+            // Generic categories (non-electronics)
+            'electronics': 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'fashion': 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'home': 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'collectibles': 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'art': 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'sports': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'toys': 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'books': 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'jewelry': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'vehicles': 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+            'other': 'https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+        };
+
+        // Electronics-focused default placeholders
+        const defaultPlaceholders = [
+            'https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Tech workspace
+            'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Laptop and phone
+            'https://images.unsplash.com/photo-1588508065123-287b28e013da?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Electronics on desk
+            'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'  // Computer setup
+        ];
+
+        // Try to match the category (case-insensitive)
+        return categoryMap[categoryLower] || defaultPlaceholders[Math.floor(Math.random() * defaultPlaceholders.length)];
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Get elements
         const container = document.getElementById('image-container');
