@@ -1,15 +1,14 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.db.models import Count, Max
+from django.db.models import Count
 
 
 from .forms import BidForm, CommentForm, AuctionForm
-from .models import Bid, Auction, User, Watchlist, Comment
+from .models import Bid, Auction, Watchlist, Comment
+from accounts.models import User
 
 
 def home(request):
@@ -37,63 +36,8 @@ def index(request):
     })
 
 
-def login_view(request):
-    if request.method == "POST":
-
-        # Attempt to sign user in
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = authenticate(request, username=username, password=password)
-
-        # Check if authentication successful
-        if user is not None:
-            login(request, user)
-            messages.success(request, f"Welcome back, {username}")
-            return HttpResponseRedirect(reverse("index"))
-        else:
-            messages.warning(request, "Invalid username and/or password.")
-            return render(request, "auctions/login.html")
-    else:
-        return render(request, "auctions/login.html")
-
-
-def logout_view(request):
-    logout(request)
-    return HttpResponseRedirect(reverse("index"))
-
-
-def register(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        first_name = request.POST["first_name"]
-        last_name = request.POST["last_name"]
-        email = request.POST["email"]
-
-        # Ensure password matches confirmation
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
-        if password != confirmation:
-            messages.warning(request, "Passwords must match.")
-            return render(request, "auctions/register.html")
-
-        # Attempt to create new user
-        try:
-            user = User.objects.create_user(username, email, password)
-            user.first_name = first_name
-            user.last_name = last_name
-            user.save()
-        except IntegrityError:
-            messages.warning(request, "Username already taken.")
-            return render(request, "auctions/register.html")
-
-        login(request, user)
-        return HttpResponseRedirect(reverse("index"))
-    else:
-        return render(request, "auctions/register.html")
-
-
 # Listing Page
-@login_required(login_url='/login')
+@login_required(login_url='/accounts/login/')
 def auction(request, auction_id):
     # Retrieve auction details
     auction = Auction.objects.get(id=auction_id)
@@ -128,7 +72,7 @@ def auction(request, auction_id):
 
 
 # Close auction
-@login_required(login_url='/login')
+@login_required(login_url='/accounts/login/')
 def close(request, auction_id):
     if request.method == "POST":
         # Update is_close attribute to be True
@@ -141,7 +85,7 @@ def close(request, auction_id):
 
 
 # Bid view
-@login_required(login_url='/login')
+@login_required(login_url='/accounts/login/')
 def bid(request):
     if request.method == "POST":
         # Store auction id
@@ -175,7 +119,7 @@ def bid(request):
 
 
 # Comments
-@login_required(login_url='/login')
+@login_required(login_url='/accounts/login/')
 def comment(request):
     # For a post request, create a new auction
     if request.method == "POST":
@@ -202,7 +146,7 @@ def comment(request):
 
 
 # Create Listing
-@login_required(login_url='/login')
+@login_required(login_url='/accounts/login/')
 def create(request):
     # For a post request, create a new auction
     if request.method == "POST":
@@ -264,7 +208,7 @@ def create(request):
 
 
 # Watchlist
-@login_required(login_url='/login')
+@login_required(login_url='/accounts/login/')
 def watchlist(request):
     if request.method == "POST":
         # Store auction id
@@ -298,7 +242,7 @@ def watchlist(request):
 
 
 # Remove auction from watchlist
-@login_required(login_url='/login')
+@login_required(login_url='/accounts/login/')
 def remove(request):
     if request.method == "POST":
         # Store auction id
@@ -341,5 +285,23 @@ def page(request, category):
     return render(request, "auctions/page.html", {
         "auctions": auctions,
         "category": category,
+        "auction_count": auction_count
+    })
+
+
+# My Auctions
+@login_required(login_url='/accounts/login/')
+def my_auctions(request):
+    """View user's created auctions."""
+    # Get all auctions created by the current user
+    auctions = Auction.objects.filter(user=request.user).order_by('-created_at')
+
+    # Count of user's auctions
+    auction_count = auctions.count()
+
+    # Render the my auctions page
+    return render(request, "auctions/my_auctions.html", {
+        "auctions": auctions,
+        "title": "My Auctions",
         "auction_count": auction_count
     })

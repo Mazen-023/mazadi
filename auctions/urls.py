@@ -5,9 +5,6 @@ from . import views
 urlpatterns = [
     path("", views.home, name="home"),
     path("auctions", views.index, name="index"),
-    path("login", views.login_view, name="login"),
-    path("logout", views.logout_view, name="logout"),
-    path("register", views.register, name="register"),
 
     # Custom Paths
     path("auction/<int:auction_id>", views.auction, name="auction"),
@@ -18,5 +15,6 @@ urlpatterns = [
     path("remove", views.remove, name="remove"),
     path("categories", views.categories, name="categories"),
     path("category/<str:category>", views.page, name="page"),
-    path("auction/<int:auction_id>/close", views.close, name="close")
+    path("auction/<int:auction_id>/close", views.close, name="close"),
+    path("my-auctions", views.my_auctions, name="my_auctions")
 ]
