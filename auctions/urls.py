@@ -16,5 +16,8 @@ urlpatterns = [
     path("categories", views.categories, name="categories"),
     path("category/<str:category>", views.page, name="page"),
     path("auction/<int:auction_id>/close", views.close, name="close"),
-    path("my-auctions", views.my_auctions, name="my_auctions")
+    path("my-auctions", views.my_auctions, name="my_auctions"),
+
+    # Auction Owner Management
+    path("auction/<int:auction_id>/delete", views.delete_auction, name="delete_auction")
 ]

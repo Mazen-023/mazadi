@@ -332,3 +332,35 @@ def my_auctions(request):
         "title": "My Auctions",
         "auction_count": auction_count
     })
+
+
+# Delete Auction
+@login_required(login_url='/accounts/login/')
+def delete_auction(request, auction_id):
+    """Delete an existing auction."""
+    # Get the auction
+    try:
+        auction = Auction.objects.get(id=auction_id)
+    except Auction.DoesNotExist:
+        messages.error(request, "Auction not found.")
+        return HttpResponseRedirect(reverse('my_auctions'))
+
+    # Check if the user is the owner of the auction
+    if request.user != auction.user:
+        messages.error(request, "You don't have permission to delete this auction.")
+        return HttpResponseRedirect(reverse('auction', args=(auction_id,)))
+
+    # Handle POST request for deletion
+    if request.method == "POST":
+        # Store auction title for confirmation message
+        auction_title = auction.title
+
+        # Delete the auction
+        auction.delete()
+
+        # Redirect to my auctions with success message
+        messages.success(request, f"Auction '{auction_title}' has been deleted.")
+        return HttpResponseRedirect(reverse('my_auctions'))
+
+    # If not a POST request, redirect to auction page
+    return HttpResponseRedirect(reverse('auction', args=(auction_id,)))
