@@ -1,0 +1,48 @@
+<!-- Notification Dropdown Content -->
+<div class="py-1 max-h-96 overflow-y-auto" role="menu" aria-orientation="vertical" aria-labelledby="notification-menu">
+    <!-- Hidden span for Alpine.js to access the unread count -->
+    <span id="unread-count" class="hidden">{{ unread_notification_count }}</span>
+
+    {% if notifications %}
+        {% for notification in notifications %}
+            <a href="{% url 'notification_detail' notification.id %}" class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-300 {% if not notification.is_read %}bg-blue-50{% endif %}" role="menuitem">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="h-8 w-8 rounded-full flex items-center justify-center {{ notification.bg_color_class }}">
+                            <i class="fas {{ notification.icon_class }} {{ notification.color_class }} text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ notification.title }}</p>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ notification.message }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ notification.time_since }}</p>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+
+        <!-- View All Link -->
+        <div class="border-t border-gray-100 mt-1">
+            <div class="flex justify-between items-center px-4 py-2">
+                <a href="{% url 'notification_list' %}" class="text-sm text-primary-600 hover:text-primary-800 font-medium transition-colors duration-300">
+                    View All
+                </a>
+                {% if unread_count > 0 %}
+                <form action="{% url 'mark_all_notifications_read' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 transition-colors duration-300">
+                        Mark All Read
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="px-4 py-6 text-center">
+            <div class="mx-auto h-12 w-12 text-gray-400 flex items-center justify-center">
+                <i class="fas fa-bell-slash text-2xl"></i>
+            </div>
+            <p class="mt-1 text-sm text-gray-500">No new notifications</p>
+        </div>
+    {% endif %}
+</div>

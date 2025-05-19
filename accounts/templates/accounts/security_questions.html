@@ -26,7 +26,7 @@
                 <div class="p-6">
                     <div class="flex items-center mb-6">
                         {% if user.profile.profile_picture %}
-                            <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="h-16 w-16 rounded-full object-cover border-2 border-primary-500">
+                            <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="h-16 w-16 rounded-full object-contain border-2 border-primary-500">
                         {% else %}
                             <div class="h-16 w-16 rounded-full bg-primary-100 flex items-center justify-center border-2 border-primary-500">
                                 <i class="fas fa-user text-2xl text-primary-500"></i>

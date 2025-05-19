@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
-from .models import UserProfile, SecurityQuestion, User
+from .models import UserProfile, SecurityQuestion, User, Rating
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -211,3 +211,59 @@ class SecurityQuestionForm(forms.Form):
         user_profile.security_answer2 = self.cleaned_data['security_answer2']
         user_profile.save()
         return user_profile
+
+
+class RatingForm(forms.ModelForm):
+    """Form for submitting user ratings."""
+
+    class Meta:
+        model = Rating
+        fields = ['score', 'comment', 'as_seller', 'as_buyer']
+        widgets = {
+            'score': forms.Select(
+                choices=Rating.RATING_CHOICES,
+                attrs={
+                    'class': 'w-full px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300',
+                }
+            ),
+            'comment': forms.Textarea(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300',
+                'placeholder': 'Share your experience with this user...',
+                'rows': 3
+            }),
+            'as_seller': forms.CheckboxInput(attrs={
+                'class': 'h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded',
+            }),
+            'as_buyer': forms.CheckboxInput(attrs={
+                'class': 'h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.rater = kwargs.pop('rater', None)
+        self.rated_user = kwargs.pop('rated_user', None)
+        self.auction = kwargs.pop('auction', None)
+        super(RatingForm, self).__init__(*args, **kwargs)
+
+        # Set labels
+        self.fields['score'].label = "Rating"
+        self.fields['comment'].label = "Review"
+        self.fields['as_seller'].label = "Rate as Seller"
+        self.fields['as_buyer'].label = "Rate as Buyer"
+
+    def save(self, commit=True):
+        rating = super(RatingForm, self).save(commit=False)
+
+        if self.rater:
+            rating.rater = self.rater
+
+        if self.rated_user:
+            rating.rated_user = self.rated_user
+
+        if self.auction:
+            rating.auction = self.auction
+
+        if commit:
+            rating.save()
+
+        return rating

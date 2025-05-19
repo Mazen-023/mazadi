@@ -34,14 +34,34 @@
                         {% endif %}
                         <h2 class="text-xl font-bold text-gray-900">{{ profile_user.username }}</h2>
                         <p class="text-sm text-gray-500 mt-1">Member since {{ profile_user.date_joined|date:"F Y" }}</p>
-                        
-                        <div class="mt-4 flex items-center">
+
+                        <div class="mt-4 flex flex-col items-center space-y-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                                 <i class="fas fa-check-circle mr-1"></i> Verified Seller
                             </span>
+
+                            <!-- Rating Badge -->
+                            <div class="flex items-center">
+                                <div class="flex items-center">
+                                    {% if profile.total_ratings_count > 0 %}
+                                        {% with avg_rating=profile.seller_rating_avg|add:profile.buyer_rating_avg|floatformat:1 %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= avg_rating|add:"0" %}
+                                                    <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                                {% else %}
+                                                    <i class="far fa-star text-yellow-500 text-xs"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <span class="ml-1 text-xs text-gray-500">({{ profile.total_ratings_count }})</span>
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="text-xs text-gray-500">No ratings yet</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
+
                     <!-- User Stats -->
                     <div class="border-t border-gray-200 pt-4">
                         <h3 class="text-sm font-medium text-gray-500 mb-3">Seller Statistics</h3>
@@ -56,13 +76,25 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Contact Options -->
+
+                    <!-- Contact & Rating Options -->
                     <div class="border-t border-gray-200 pt-4 mt-4">
-                        <h3 class="text-sm font-medium text-gray-500 mb-3">Contact Options</h3>
-                        <button class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-300 mb-2">
-                            <i class="fas fa-envelope mr-2"></i> Contact Seller
-                        </button>
+                        <h3 class="text-sm font-medium text-gray-500 mb-3">Actions</h3>
+                        <div class="space-y-2">
+                            <button class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-300">
+                                <i class="fas fa-envelope mr-2"></i> Contact Seller
+                            </button>
+
+                            {% if can_rate %}
+                            <a href="{% url 'submit_rating' profile_user.username %}" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-300">
+                                <i class="fas fa-star mr-2"></i> Rate User
+                            </a>
+                            {% endif %}
+
+                            <a href="{% url 'user_ratings' profile_user.username %}" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-300">
+                                <i class="fas fa-list mr-2"></i> View All Ratings
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -74,7 +106,7 @@
             <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
                 <div class="p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-4">About {{ profile_user.first_name|default:profile_user.username }}</h2>
-                    
+
                     <div class="prose max-w-none text-gray-700">
                         {% if profile.bio %}
                             <p>{{ profile.bio }}</p>
@@ -84,12 +116,92 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Ratings Section -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-900">Ratings & Reviews</h2>
+                        <a href="{% url 'user_ratings' profile_user.username %}" class="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors duration-300">
+                            View All <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    {% if ratings %}
+                        <div class="space-y-6">
+                            {% for rating in ratings|slice:":3" %}
+                                <div class="bg-gray-50 rounded-lg p-4 transition-all duration-300 hover:shadow-sm">
+                                    <div class="flex items-start">
+                                        <!-- User Avatar -->
+                                        <div class="flex-shrink-0">
+                                            {% if rating.rater.profile.profile_picture %}
+                                                <img src="{{ rating.rater.profile.profile_picture.url }}" alt="{{ rating.rater.username }}" class="h-10 w-10 rounded-full object-cover">
+                                            {% else %}
+                                                <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                                    <i class="fas fa-user text-primary-500"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Rating Content -->
+                                        <div class="ml-3 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h3 class="text-sm font-medium text-gray-900">
+                                                        <a href="{% url 'public_profile' rating.rater.username %}" class="hover:text-primary-600 transition-colors duration-300">
+                                                            {{ rating.rater.username }}
+                                                        </a>
+                                                    </h3>
+                                                    <div class="flex items-center mt-1">
+                                                        <div class="flex items-center">
+                                                            {% for i in "12345" %}
+                                                                {% if forloop.counter <= rating.score %}
+                                                                    <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                                                {% else %}
+                                                                    <i class="far fa-star text-yellow-500 text-xs"></i>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                        <span class="ml-2 text-xs text-gray-500">{{ rating.created_at|date:"M d, Y" }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {% if rating.comment %}
+                                            <div class="mt-2 text-sm text-gray-700 line-clamp-2">
+                                                {{ rating.comment }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="mx-auto h-16 w-16 text-gray-400">
+                                <i class="fas fa-star-half-alt text-4xl"></i>
+                            </div>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No ratings yet</h3>
+                            <p class="mt-1 text-sm text-gray-500">Be the first to rate this user.</p>
+
+                            {% if can_rate %}
+                            <div class="mt-6">
+                                <a href="{% url 'submit_rating' profile_user.username %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300">
+                                    <i class="fas fa-star mr-2"></i> Rate User
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- Active Listings -->
             <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
                 <div class="p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-6">Active Listings</h2>
-                    
+
                     {% with active_auctions=profile_user.auctions.all|dictsortreversed:"created_at" %}
                         {% if active_auctions %}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -98,9 +210,9 @@
                                         <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md">
                                             <div class="h-48 overflow-hidden relative">
                                                 {% if auction.image %}
-                                                    <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                                                    <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-contain">
                                                 {% elif auction.image_url %}
-                                                    <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                                                    <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-contain">
                                                 {% else %}
                                                     <div class="w-full h-full bg-gray-200 flex items-center justify-center">
                                                         <i class="fas fa-image text-gray-400 text-4xl"></i>
@@ -135,12 +247,12 @@
                     {% endwith %}
                 </div>
             </div>
-            
+
             <!-- Completed Auctions -->
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div class="p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-6">Completed Auctions</h2>
-                    
+
                     {% with closed_auctions=profile_user.auctions.all|dictsortreversed:"created_at" %}
                         {% if closed_auctions %}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -149,9 +261,9 @@
                                         <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md">
                                             <div class="h-48 overflow-hidden relative">
                                                 {% if auction.image %}
-                                                    <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-cover filter grayscale opacity-75">
+                                                    <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-contain filter grayscale opacity-75">
                                                 {% elif auction.image_url %}
-                                                    <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-cover filter grayscale opacity-75">
+                                                    <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-contain filter grayscale opacity-75">
                                                 {% else %}
                                                     <div class="w-full h-full bg-gray-200 flex items-center justify-center">
                                                         <i class="fas fa-image text-gray-400 text-4xl"></i>

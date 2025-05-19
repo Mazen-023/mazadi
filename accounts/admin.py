@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, UserProfile, SecurityQuestion
+from .models import User, UserProfile, SecurityQuestion, Rating
 
 class CustomUserAdmin(UserAdmin):
     """Custom admin for the User model."""
@@ -19,6 +19,14 @@ class SecurityQuestionAdmin(admin.ModelAdmin):
     list_display = ('question',)
     search_fields = ('question',)
 
+class RatingAdmin(admin.ModelAdmin):
+    """Admin for the Rating model."""
+    list_display = ('rated_user', 'rater', 'score', 'as_seller', 'as_buyer', 'created_at')
+    list_filter = ('score', 'as_seller', 'as_buyer', 'created_at')
+    search_fields = ('rated_user__username', 'rater__username', 'comment')
+    raw_id_fields = ('rated_user', 'rater', 'auction')
+
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(SecurityQuestion, SecurityQuestionAdmin)
+admin.site.register(Rating, RatingAdmin)

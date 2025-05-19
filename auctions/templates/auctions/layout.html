@@ -127,8 +127,68 @@
                 <!-- User Navigation -->
                 <div class="flex items-center">
                     <!-- Desktop User Menu -->
-                    <div class="hidden md:flex md:items-center">
+                    <div class="hidden md:flex md:items-center space-x-4">
                         {% if user.is_authenticated %}
+                            <!-- Notification Bell -->
+                            <div class="relative" x-data="{ notificationsOpen: false, unreadCount: 0 }" x-init="
+                                // Load initial unread count
+                                fetch('{% url 'notification_dropdown' %}')
+                                    .then(response => response.text())
+                                    .then(html => {
+                                        const parser = new DOMParser();
+                                        const doc = parser.parseFromString(html, 'text/html');
+                                        const countElement = doc.querySelector('#unread-count');
+                                        if (countElement) {
+                                            unreadCount = parseInt(countElement.textContent);
+                                        }
+                                    });
+                            ">
+                                <button @click="notificationsOpen = !notificationsOpen" class="relative p-1 rounded-full text-gray-600 hover:text-primary-600 focus:outline-none transition duration-300">
+                                    <span class="sr-only">View notifications</span>
+                                    <i class="fas fa-bell text-lg"></i>
+                                    {% if unread_notification_count > 0 %}
+                                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
+                                            {{ unread_notification_count }}
+                                        </span>
+                                    {% endif %}
+                                </button>
+
+                                <div x-show="notificationsOpen"
+                                     @click.away="notificationsOpen = false"
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-75"
+                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                     class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50"
+                                     x-init="
+                                        $watch('notificationsOpen', value => {
+                                            if (value) {
+                                                fetch('{% url 'notification_dropdown' %}')
+                                                    .then(response => response.text())
+                                                    .then(html => {
+                                                        $refs.notificationContent.innerHTML = html;
+                                                        const countElement = $refs.notificationContent.querySelector('#unread-count');
+                                                        if (countElement) {
+                                                            unreadCount = parseInt(countElement.textContent);
+                                                        }
+                                                    });
+                                            }
+                                        })
+                                     ">
+                                    <div x-ref="notificationContent">
+                                        <div class="py-3 px-4 text-center">
+                                            <div class="inline-block animate-spin-slow">
+                                                <i class="fas fa-circle-notch text-primary-500"></i>
+                                            </div>
+                                            <p class="text-sm text-gray-500 mt-1">Loading notifications...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- User Menu -->
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" class="flex items-center text-sm font-medium text-gray-700 hover:text-primary-600 focus:outline-none transition duration-300">
                                     <span class="mr-2">{{ user.username }}</span>
@@ -147,6 +207,9 @@
                                      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                                     <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-300">
                                         <i class="fas fa-user-circle mr-2"></i> My Profile
+                                    </a>
+                                    <a href="{% url 'notification_list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-300">
+                                        <i class="fas fa-bell mr-2"></i> Notifications
                                     </a>
                                     <div class="border-t border-gray-100 my-1"></div>
                                     <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-300">
@@ -215,6 +278,14 @@
                         <div class="mt-3 space-y-1">
                             <a href="{% url 'profile' %}" class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition duration-300">
                                 <i class="fas fa-user-circle mr-2"></i> My Profile
+                            </a>
+                            <a href="{% url 'notification_list' %}" class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition duration-300">
+                                <i class="fas fa-bell mr-2"></i> Notifications
+                                {% if unread_notification_count > 0 %}
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        {{ unread_notification_count }}
+                                    </span>
+                                {% endif %}
                             </a>
                             <a href="{% url 'edit_profile' %}" class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition duration-300">
                                 <i class="fas fa-cog mr-2"></i> Account Settings

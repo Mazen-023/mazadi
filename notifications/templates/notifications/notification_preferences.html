@@ -1,0 +1,217 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block title %}Notification Preferences - Mazadi{% endblock %}
+
+{% block body %}
+<!-- Page Header -->
+<div class="bg-gradient-to-r from-primary-600 to-primary-800 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-extrabold text-white sm:text-4xl">
+                Notification Preferences
+            </h1>
+            <p class="mt-3 max-w-2xl mx-auto text-xl text-primary-100">
+                Customize how you receive notifications
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Preferences Form -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="p-6">
+            <form action="{% url 'notification_preferences' %}" method="post">
+                {% csrf_token %}
+                
+                <!-- Email Notifications -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Email Notifications</h2>
+                    <p class="text-sm text-gray-500 mb-4">Choose which notifications you want to receive via email.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_bid" name="email_bid" type="checkbox" {% if preferences.email_bid %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_bid" class="font-medium text-gray-700">New Bids</label>
+                                <p class="text-gray-500">Receive an email when someone bids on your auction</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_outbid" name="email_outbid" type="checkbox" {% if preferences.email_outbid %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_outbid" class="font-medium text-gray-700">Outbid Alerts</label>
+                                <p class="text-gray-500">Receive an email when someone outbids you</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_auction_won" name="email_auction_won" type="checkbox" {% if preferences.email_auction_won %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_auction_won" class="font-medium text-gray-700">Auction Won</label>
+                                <p class="text-gray-500">Receive an email when you win an auction</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_auction_ended" name="email_auction_ended" type="checkbox" {% if preferences.email_auction_ended %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_auction_ended" class="font-medium text-gray-700">Auction Ended</label>
+                                <p class="text-gray-500">Receive an email when your auction ends</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_comment" name="email_comment" type="checkbox" {% if preferences.email_comment %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_comment" class="font-medium text-gray-700">Comments</label>
+                                <p class="text-gray-500">Receive an email when someone comments on your auction</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_rating" name="email_rating" type="checkbox" {% if preferences.email_rating %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_rating" class="font-medium text-gray-700">Ratings</label>
+                                <p class="text-gray-500">Receive an email when someone rates you</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_message" name="email_message" type="checkbox" {% if preferences.email_message %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_message" class="font-medium text-gray-700">Messages</label>
+                                <p class="text-gray-500">Receive an email when you get a new message</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="email_system" name="email_system" type="checkbox" {% if preferences.email_system %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="email_system" class="font-medium text-gray-700">System Notifications</label>
+                                <p class="text-gray-500">Receive emails about important system updates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- In-App Notifications -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">In-App Notifications</h2>
+                    <p class="text-sm text-gray-500 mb-4">Choose which notifications you want to receive within the app.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_bid" name="app_bid" type="checkbox" {% if preferences.app_bid %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_bid" class="font-medium text-gray-700">New Bids</label>
+                                <p class="text-gray-500">Receive a notification when someone bids on your auction</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_outbid" name="app_outbid" type="checkbox" {% if preferences.app_outbid %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_outbid" class="font-medium text-gray-700">Outbid Alerts</label>
+                                <p class="text-gray-500">Receive a notification when someone outbids you</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_auction_won" name="app_auction_won" type="checkbox" {% if preferences.app_auction_won %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_auction_won" class="font-medium text-gray-700">Auction Won</label>
+                                <p class="text-gray-500">Receive a notification when you win an auction</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_auction_ended" name="app_auction_ended" type="checkbox" {% if preferences.app_auction_ended %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_auction_ended" class="font-medium text-gray-700">Auction Ended</label>
+                                <p class="text-gray-500">Receive a notification when your auction ends</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_comment" name="app_comment" type="checkbox" {% if preferences.app_comment %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_comment" class="font-medium text-gray-700">Comments</label>
+                                <p class="text-gray-500">Receive a notification when someone comments on your auction</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_rating" name="app_rating" type="checkbox" {% if preferences.app_rating %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_rating" class="font-medium text-gray-700">Ratings</label>
+                                <p class="text-gray-500">Receive a notification when someone rates you</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_message" name="app_message" type="checkbox" {% if preferences.app_message %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_message" class="font-medium text-gray-700">Messages</label>
+                                <p class="text-gray-500">Receive a notification when you get a new message</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="app_system" name="app_system" type="checkbox" {% if preferences.app_system %}checked{% endif %} class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="app_system" class="font-medium text-gray-700">System Notifications</label>
+                                <p class="text-gray-500">Receive notifications about important system updates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <a href="{% url 'notification_list' %}" class="mr-4 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300">
+                        Cancel
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300">
+                        Save Preferences
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

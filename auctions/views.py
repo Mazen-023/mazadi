@@ -42,8 +42,8 @@ def auction(request, auction_id):
     # Retrieve auction details
     auction = Auction.objects.get(id=auction_id)
 
-    # Retrieve bid on the auction
-    bid = Bid.objects.get(auction=auction)
+    # Retrieve the highest bid on the auction
+    bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
 
     # Retrieve the watchlisted auctions
     watchlist = Watchlist.objects.filter(user=request.user).first()
@@ -94,22 +94,27 @@ def bid(request):
         # Create a form instance
         form = BidForm(request.POST)
 
-        # Catch the current bid
-        current_bid = Bid.objects.filter(auction=auction_id).first().amount
+        # Get the auction object
+        auction = Auction.objects.get(id=auction_id)
+
+        # Get the highest bid for this auction
+        highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
+        current_bid_amount = highest_bid.amount if highest_bid else 0
 
         # Check form validation
         if form.is_valid():
-
             # Isolate the bid value from the 'cleaned' version of form data
             bid_input = form.cleaned_data['bid']
 
-            # Check if the new bid is greater then the current bid
-            if bid_input <= current_bid:
+            # Check if the new bid is greater than the current bid
+            if bid_input <= current_bid_amount:
                 messages.warning(request, "Your bid should be greater than the current bid.")
                 return HttpResponseRedirect(reverse('auction', args=(auction_id,)))
 
-            # Update the current bid with the new value
-            Bid.objects.filter(auction=Auction.objects.get(id=auction_id)).update(amount=bid_input, user=request.user)
+            # Create a new bid
+            new_bid = Bid(amount=bid_input, auction=auction, user=request.user)
+            new_bid.save()
+
             messages.success(request, "Your bid now is the current bid.")
             return HttpResponseRedirect(reverse('auction', args=(auction_id,)))
 
@@ -186,8 +191,8 @@ def create(request):
 
             auction.save()
 
-            # Create bid object
-            bid = Bid(amount=amount, auction=Auction.objects.get(id=auction.id), user=request.user)
+            # Create initial bid object
+            bid = Bid(amount=amount, auction=auction, user=request.user)
             bid.save()
 
             # redirect to auction page

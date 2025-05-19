@@ -50,20 +50,41 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
     <!-- Auction Status Banner -->
     {% if auction.is_close %}
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 flex items-center">
-            <div class="flex-shrink-0">
-                <i class="fas fa-gavel text-red-500 text-xl"></i>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">This auction has ended</h3>
-                <div class="mt-1 text-sm text-red-700">
-                    {% if user.id == bid.user.id %}
-                        Congratulations! You won this auction with a bid of ${{ bid.amount }}.
-                    {% else %}
-                        This auction was won by {{ bid.user.username }} with a bid of ${{ bid.amount }}.
-                    {% endif %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-gavel text-red-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">This auction has ended</h3>
+                    <div class="mt-1 text-sm text-red-700">
+                        {% if user.id == bid.user.id %}
+                            Congratulations! You won this auction with a bid of ${{ bid.amount }}.
+                        {% else %}
+                            This auction was won by {{ bid.user.username }} with a bid of ${{ bid.amount }}.
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+
+            <!-- Post-Auction Rating Buttons -->
+            {% if bid and user.is_authenticated %}
+                <div class="mt-4 flex flex-wrap gap-2 justify-end">
+                    {% if user.id == bid.user.id %}
+                        <!-- Winner can rate the seller -->
+                        <a href="{% url 'submit_rating' auction.user.username %}?auction_id={{ auction.id }}"
+                           class="inline-flex items-center px-3 py-2 border border-primary-600 text-primary-600 rounded-md hover:bg-primary-600 hover:text-white transition-all duration-300">
+                            <i class="fas fa-star-half-alt mr-2"></i> Rate Seller
+                        </a>
+                    {% elif user.id == auction.user.id %}
+                        <!-- Seller can rate the winner -->
+                        <a href="{% url 'submit_rating' bid.user.username %}?auction_id={{ auction.id }}"
+                           class="inline-flex items-center px-3 py-2 border border-primary-600 text-primary-600 rounded-md hover:bg-primary-600 hover:text-white transition-all duration-300">
+                            <i class="fas fa-star-half-alt mr-2"></i> Rate Buyer
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     {% elif auction.is_close == False %}
         <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-8 flex items-center">
@@ -130,11 +151,11 @@
                 <div class="flex p-2 bg-gray-50 border-t border-gray-200">
                     <div class="w-20 h-20 border border-primary-300 rounded overflow-hidden">
                         {% if auction.image %}
-                            <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                            <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-contain">
                         {% elif auction.image_url %}
-                            <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                            <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-contain">
                         {% else %}
-                            <img src="https://via.placeholder.com/800x600?text=No+Image" alt="{{ auction.title }}" class="w-full h-full object-cover">
+                            <img src="https://via.placeholder.com/800x600?text=No+Image" alt="{{ auction.title }}" class="w-full h-full object-contain">
                         {% endif %}
                     </div>
                     <div class="w-20 h-20 mx-2 border border-gray-200 rounded overflow-hidden opacity-50 cursor-pointer hover:opacity-100 transition duration-300">
@@ -172,6 +193,23 @@
                                     <i class="fas fa-check-circle mr-1"></i> Verified Seller
                                 </span>
                             </h4>
+                            <!-- Seller Rating -->
+                            <div class="flex items-center mt-1">
+                                <div class="flex items-center">
+                                    {% if auction.user.profile.seller_rating_avg > 0 %}
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= auction.user.profile.seller_rating_avg %}
+                                                <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-yellow-500 text-xs"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ml-1 text-xs text-gray-500">({{ auction.user.profile.total_ratings_count }})</span>
+                                    {% else %}
+                                        <span class="text-xs text-gray-500">No ratings yet</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                             <p class="text-gray-500 flex items-center mt-1">
                                 <i class="far fa-calendar-alt text-gray-400 mr-2"></i>
                                 Member since {{ auction.user.date_joined|date:"F Y" }}
@@ -180,12 +218,14 @@
                                 <a href="{% url 'public_profile' auction.user.username %}" class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300 flex items-center">
                                     <i class="fas fa-user mr-1"></i> View Profile
                                 </a>
-                                <button class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300 flex items-center">
-                                    <i class="far fa-envelope mr-1"></i> Contact
-                                </button>
-                                <button class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300 flex items-center">
+                                <a href="{% url 'user_ratings' auction.user.username %}" class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300 flex items-center">
                                     <i class="far fa-star mr-1"></i> View Ratings
-                                </button>
+                                </a>
+                                {% if user.is_authenticated and user.id != auction.user.id %}
+                                <a href="{% url 'submit_rating' auction.user.username %}?auction_id={{ auction.id }}" class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300 flex items-center">
+                                    <i class="fas fa-star-half-alt mr-1"></i> Rate Seller
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -439,13 +479,13 @@
                         <!-- Image with hover zoom effect -->
                         <div class="w-full h-full overflow-hidden group">
                             {% if related.image %}
-                                <img src="{{ related.image.url }}" alt="{{ related.title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                <img src="{{ related.image.url }}" alt="{{ related.title }}" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500">
                             {% elif related.image_url %}
-                                <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500">
                             {% else %}
                                 <img src="https://via.placeholder.com/800x600?text=No+Image"
                                      alt="{{ related.title }}"
-                                     class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                     class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500"
                                 >
                             {% endif %}
                         </div>

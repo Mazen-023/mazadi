@@ -72,11 +72,23 @@
                         </div>
 
                         <!-- Image with enhanced hover effect -->
-                        <img
-                            src="{{ auction.image_url }}"
-                            class="w-full h-full object-cover transition-all duration-700 ease-in-out transform group-hover:scale-110 filter group-hover:brightness-105"
-                            alt="{{ auction.title }}"
-                        >
+                        {% if auction.image %}
+                            <img
+                                src="{{ auction.image.url }}"
+                                class="w-full h-full object-contain transition-all duration-700 ease-in-out transform group-hover:scale-110 filter group-hover:brightness-105"
+                                alt="{{ auction.title }}"
+                            >
+                        {% elif auction.image_url %}
+                            <img
+                                src="{{ auction.image_url }}"
+                                class="w-full h-full object-contain transition-all duration-700 ease-in-out transform group-hover:scale-110 filter group-hover:brightness-105"
+                                alt="{{ auction.title }}"
+                            >
+                        {% else %}
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-gray-400 text-4xl"></i>
+                            </div>
+                        {% endif %}
 
                         <!-- Overlay gradient on hover -->
                         <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
