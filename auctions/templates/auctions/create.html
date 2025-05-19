@@ -48,11 +48,22 @@
                                         <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
                                         <p class="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 5MB)</p>
                                     </div>
-                                    {{ form.image }}
+                                    <input type="file" id="{{ form.image.id_for_label }}" name="{{ form.image.html_name }}" class="hidden" accept="image/*" onchange="previewImage(this)">
                                 </label>
                             </div>
                         </div>
                         <p class="mt-1 text-xs text-gray-500">Upload a high-quality image of your item.</p>
+
+                        <!-- Image Preview -->
+                        <div id="imagePreviewContainer" class="mt-4 hidden">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Image Preview:</h4>
+                            <div class="relative bg-gray-100 rounded-lg overflow-hidden" style="height: 200px;">
+                                <img id="imagePreview" src="#" alt="Preview" class="w-full h-full object-contain">
+                                <button type="button" onclick="removeImage()" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Image URL Field -->
@@ -179,4 +190,72 @@
         </ul>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Function to preview the uploaded image
+    function previewImage(input) {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const preview = document.getElementById('imagePreview');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+
+                // Also clear any URL input when an image is uploaded
+                const urlInput = document.getElementById('{{ form.image_url.id_for_label }}');
+                if (urlInput) {
+                    urlInput.value = '';
+                }
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Function to remove the uploaded image
+    function removeImage() {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const preview = document.getElementById('imagePreview');
+        const fileInput = document.getElementById('{{ form.image.id_for_label }}');
+
+        preview.src = '#';
+        previewContainer.classList.add('hidden');
+        fileInput.value = '';
+    }
+
+    // Function to preview image from URL
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlInput = document.getElementById('{{ form.image_url.id_for_label }}');
+
+        if (urlInput) {
+            urlInput.addEventListener('input', function() {
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const preview = document.getElementById('imagePreview');
+                const fileInput = document.getElementById('{{ form.image.id_for_label }}');
+
+                if (this.value.trim() !== '') {
+                    preview.src = this.value;
+                    previewContainer.classList.remove('hidden');
+
+                    // Clear file input when URL is provided
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+
+                    // Handle image load error
+                    preview.onerror = function() {
+                        preview.src = '/static/auctions/placeholder.png';
+                    };
+                } else {
+                    previewContainer.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
