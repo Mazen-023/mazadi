@@ -206,12 +206,14 @@
                                 src="{{ auction.image.url }}"
                                 class="w-full h-full object-contain transition-all duration-700 ease-in-out transform group-hover:scale-110 filter group-hover:brightness-105"
                                 alt="{{ auction.title }}"
+                                loading="lazy"
                             >
                         {% elif auction.image_url %}
                             <img
                                 src="{{ auction.image_url }}"
                                 class="w-full h-full object-contain transition-all duration-700 ease-in-out transform group-hover:scale-110 filter group-hover:brightness-105"
                                 alt="{{ auction.title }}"
+                                loading="lazy"
                             >
                         {% else %}
                             <div class="w-full h-full bg-gray-200 flex items-center justify-center">

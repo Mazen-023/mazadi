@@ -111,17 +111,20 @@
                             <img src="{{ auction.image.url }}"
                                  alt="{{ auction.title }}"
                                  id="zoomable-image"
-                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out">
+                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out"
+                                 loading="lazy">
                         {% elif auction.image_url %}
                             <img src="{{ auction.image_url }}"
                                  alt="{{ auction.title }}"
                                  id="zoomable-image"
-                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out">
+                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out"
+                                 loading="lazy">
                         {% else %}
-                            <img src="https://via.placeholder.com/800x600?text=No+Image"
+                            <img src="/static/auctions/placeholder.png"
                                  alt="{{ auction.title }}"
                                  id="zoomable-image"
-                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out">
+                                 class="w-full h-full object-contain object-center transition-all duration-300 ease-in-out"
+                                 loading="lazy">
                         {% endif %}
 
                         <!-- Zoom Lens -->
@@ -151,11 +154,11 @@
                 <div class="flex p-2 bg-gray-50 border-t border-gray-200">
                     <div class="w-20 h-20 border border-primary-300 rounded overflow-hidden">
                         {% if auction.image %}
-                            <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-contain">
+                            <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="w-full h-full object-contain" loading="lazy">
                         {% elif auction.image_url %}
-                            <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-contain">
+                            <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="w-full h-full object-contain" loading="lazy">
                         {% else %}
-                            <img src="https://via.placeholder.com/800x600?text=No+Image" alt="{{ auction.title }}" class="w-full h-full object-contain">
+                            <img src="/static/auctions/placeholder.png" alt="{{ auction.title }}" class="w-full h-full object-contain" loading="lazy">
                         {% endif %}
                     </div>
                     <div class="w-20 h-20 mx-2 border border-gray-200 rounded overflow-hidden opacity-50 cursor-pointer hover:opacity-100 transition duration-300">
@@ -180,9 +183,13 @@
                 <div class="p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center transform transition-all duration-500 hover:scale-110 hover:rotate-6 group">
-                                <i class="fas fa-user text-primary-500 transition-all duration-500 group-hover:text-primary-600"></i>
-                            </div>
+                            {% if auction.user.profile.profile_picture %}
+                                <img src="{{ auction.user.profile.profile_picture.url }}" alt="{{ auction.user.username }}" class="w-16 h-16 rounded-full object-cover border-2 border-primary-300 transform transition-all duration-500 hover:scale-110 hover:rotate-6">
+                            {% else %}
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center transform transition-all duration-500 hover:scale-110 hover:rotate-6 group">
+                                    <i class="fas fa-user text-primary-500 transition-all duration-500 group-hover:text-primary-600"></i>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="ml-6">
                             <h4 class="text-lg font-medium text-gray-900 flex items-center">
@@ -267,7 +274,12 @@
                             <span class="text-gray-700 font-medium flex items-center">
                                 <i class="fas fa-user text-primary-500 mr-2"></i>Bid Placed By:
                             </span>
-                            <span class="text-gray-900 font-medium">{{ bid.user.first_name }} {{ bid.user.last_name }}</span>
+                            <span class="text-gray-900 font-medium flex items-center">
+                                {{ bid.user.first_name }} {{ bid.user.last_name }}
+                                {% if bid.user.profile.profile_picture %}
+                                    <img src="{{ bid.user.profile.profile_picture.url }}" alt="{{ bid.user.username }}" class="h-6 w-6 rounded-full object-cover border border-primary-200 ml-2">
+                                {% endif %}
+                            </span>
                         </div>
 
                         {% if auction.is_close == False and user.is_authenticated %}
@@ -395,9 +407,13 @@
                 <div class="p-6 hover:bg-gray-50 transition-colors duration-300 animate-fade-in" style="animation-delay: {{ forloop.counter0 }}00ms">
                     <div class="flex space-x-3">
                         <div class="flex-shrink-0">
-                            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center transform transition-transform duration-300 hover:scale-110 hover:rotate-3">
-                                <i class="fas fa-user text-primary-500"></i>
-                            </div>
+                            {% if comment.user.profile.profile_picture %}
+                                <img src="{{ comment.user.profile.profile_picture.url }}" alt="{{ comment.user.username }}" class="h-10 w-10 rounded-full object-cover border border-primary-200 transform transition-transform duration-300 hover:scale-110 hover:rotate-3">
+                            {% else %}
+                                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center transform transition-transform duration-300 hover:scale-110 hover:rotate-3">
+                                    <i class="fas fa-user text-primary-500"></i>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-900 flex items-center">
@@ -479,13 +495,14 @@
                         <!-- Image with hover zoom effect -->
                         <div class="w-full h-full overflow-hidden group">
                             {% if related.image %}
-                                <img src="{{ related.image.url }}" alt="{{ related.title }}" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500">
+                                <img src="{{ related.image.url }}" alt="{{ related.title }}" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500" loading="lazy">
                             {% elif related.image_url %}
-                                <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500">
+                                <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500" loading="lazy">
                             {% else %}
-                                <img src="https://via.placeholder.com/800x600?text=No+Image"
+                                <img src="/static/auctions/placeholder.png"
                                      alt="{{ related.title }}"
                                      class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500"
+                                     loading="lazy"
                                 >
                             {% endif %}
                         </div>
@@ -592,6 +609,32 @@
         const img = document.getElementById('zoomable-image');
         const lens = document.getElementById('zoom-lens');
         const result = document.getElementById('zoom-result');
+
+        // Preload main image
+        if (img) {
+            // Show loading indicator
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'absolute inset-0 bg-gray-100 flex items-center justify-center z-10 transition-opacity duration-300';
+            loadingOverlay.innerHTML = '<div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>';
+            loadingOverlay.id = 'loading-overlay';
+            container.appendChild(loadingOverlay);
+
+            // When image is loaded, remove the loading indicator
+            img.onload = function() {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => {
+                        overlay.remove();
+                    }, 300);
+                }
+            };
+
+            // If image is already cached, trigger onload manually
+            if (img.complete) {
+                img.onload();
+            }
+        }
 
         // Variables
         let isZoomed = false;

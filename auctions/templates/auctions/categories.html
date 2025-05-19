@@ -28,8 +28,7 @@
                         <div class="aspect-square bg-gray-100 overflow-hidden relative">
                             <img src="{% static 'auctions/'|add:category.category|add:'.png' %}"
                                 alt="{{ category.category }}"
-                                class="w-full h-full object-contain transition-all duration-300 ease-in-out p-6"
-                                onerror="this.src='https://via.placeholder.com/300?text={{ category.category }}'">
+                                class="w-full h-full object-contain transition-all duration-300 ease-in-out p-6">
 
                             <!-- Overlay on hover -->
                             <div class="absolute inset-0 bg-primary-600 bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">

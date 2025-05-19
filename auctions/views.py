@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.db.models import Count
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 from .forms import BidForm, CommentForm, AuctionForm
@@ -30,9 +31,30 @@ def home(request):
 
 
 def index(request):
-    # Active Listings Page (all auctions)
+    # Get all auctions ordered by creation date
+    auctions_list = Auction.objects.all().order_by('-created_at')
+
+    # Number of auctions per page
+    per_page = 12
+
+    # Create paginator object
+    paginator = Paginator(auctions_list, per_page)
+
+    # Get page number from request
+    page = request.GET.get('page', 1)
+
+    try:
+        # Get the auctions for the requested page
+        auctions = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page
+        auctions = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page
+        auctions = paginator.page(paginator.num_pages)
+
     return render(request, "auctions/index.html", {
-        "auctions": Auction.objects.all().order_by('-created_at')
+        "auctions": auctions,
     })
 
 
