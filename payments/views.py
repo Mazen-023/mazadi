@@ -242,3 +242,41 @@ def seller_payments(request):
         'total_earnings': total_earnings,
         'title': 'Seller Payments'
     })
+
+
+@login_required(login_url='/accounts/login/')
+def payment_receipt(request, payment_id):
+    """Generate and display a receipt for a completed payment"""
+    # Get the payment or return 404
+    payment = get_object_or_404(Payment, id=payment_id)
+
+    # Ensure the user owns this payment or is the seller
+    if payment.user != request.user and payment.auction.user != request.user:
+        messages.error(request, "You don't have permission to view this receipt.")
+        return redirect('index')
+
+    # Check if payment is completed
+    if payment.status != 'completed':
+        messages.warning(request, "Receipt is only available for completed payments.")
+        if payment.user == request.user:
+            return redirect('payment_history')
+        else:
+            return redirect('seller_payments')
+
+    # Get the auction and users involved
+    auction = payment.auction
+    buyer = payment.user
+    seller = auction.user
+
+    # Generate a unique receipt number (payment ID + timestamp)
+    receipt_number = f"REC-{payment.id}-{int(payment.created_at.timestamp())}"
+
+    # Render the receipt template
+    return render(request, 'payments/receipt.html', {
+        'payment': payment,
+        'auction': auction,
+        'buyer': buyer,
+        'seller': seller,
+        'receipt_number': receipt_number,
+        'title': f'Receipt #{receipt_number}'
+    })

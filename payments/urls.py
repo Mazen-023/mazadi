@@ -8,4 +8,5 @@ urlpatterns = [
     path('webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('history/', views.payment_history, name='payment_history'),
     path('seller/', views.seller_payments, name='seller_payments'),
+    path('receipt/<int:payment_id>/', views.payment_receipt, name='payment_receipt'),
 ]

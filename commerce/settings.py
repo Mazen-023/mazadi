@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'auctions',
     'accounts',
     'notifications',
-    'payments',  # New app for payment processing
+    'payments',
+    'messaging',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

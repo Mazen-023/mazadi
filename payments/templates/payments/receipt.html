@@ -1,0 +1,195 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Mazadi{% endblock %}
+
+{% block extra_head %}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #receipt-container, #receipt-container * {
+            visibility: visible;
+        }
+        #receipt-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Receipt Header -->
+    <div class="flex justify-between items-center mb-8 no-print">
+        <h1 class="text-2xl font-bold text-gray-900">Payment Receipt</h1>
+        <div class="flex space-x-4">
+            <button onclick="window.print()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                <i class="fas fa-print mr-2"></i> Print Receipt
+            </button>
+            <a href="{% if request.user == payment.user %}{% url 'payment_history' %}{% else %}{% url 'seller_payments' %}{% endif %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Receipt Content -->
+    <div id="receipt-container" class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+        <!-- Receipt Header -->
+        <div class="bg-gradient-to-r from-primary-600 to-primary-800 px-6 py-4 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold">Mazadi Auctions</h2>
+                    <p class="text-primary-100">Online Auction Platform</p>
+                </div>
+                <div class="text-right">
+                    <h3 class="text-lg font-semibold">Receipt #{{ receipt_number }}</h3>
+                    <p class="text-primary-100">{{ payment.created_at|date:"F j, Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receipt Body -->
+        <div class="p-6 space-y-6">
+            <!-- Transaction Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Buyer Information -->
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Buyer</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="font-medium text-gray-900">{{ buyer.first_name }} {{ buyer.last_name }}</p>
+                        <p class="text-gray-600">{{ buyer.email }}</p>
+                        {% if buyer.profile.phone_number %}
+                            <p class="text-gray-600">{{ buyer.profile.phone_number }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Seller Information -->
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Seller</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="font-medium text-gray-900">{{ seller.first_name }} {{ seller.last_name }}</p>
+                        <p class="text-gray-600">{{ seller.email }}</p>
+                        {% if seller.profile.phone_number %}
+                            <p class="text-gray-600">{{ seller.profile.phone_number }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item Details -->
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Item Purchased</h3>
+                <div class="bg-gray-50 rounded-lg overflow-hidden">
+                    <div class="flex items-center p-4">
+                        <div class="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-md overflow-hidden">
+                            {% if auction.image %}
+                                <img src="{{ auction.image.url }}" alt="{{ auction.title }}" class="h-16 w-16 object-contain">
+                            {% elif auction.image_url %}
+                                <img src="{{ auction.image_url }}" alt="{{ auction.title }}" class="h-16 w-16 object-contain">
+                            {% else %}
+                                <div class="h-16 w-16 flex items-center justify-center">
+                                    <i class="fas fa-image text-gray-400 text-2xl"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="text-lg font-medium text-gray-900">{{ auction.title }}</h4>
+                            <p class="text-gray-600 text-sm">{{ auction.description|truncatechars:100 }}</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 px-4 py-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Auction ID:</span>
+                            <span class="text-gray-900 font-medium">{{ auction.id }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span class="text-gray-500">Category:</span>
+                            <span class="text-gray-900 font-medium">{{ auction.category }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Details -->
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Payment Details</h3>
+                <div class="bg-gray-50 rounded-lg overflow-hidden">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Payment ID</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ payment.id }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Payment Date</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ payment.created_at|date:"F j, Y" }} at {{ payment.created_at|time:"g:i A" }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Credit Card</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Payment Status</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Completed
+                                    </span>
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="bg-gray-100 px-4 py-5 sm:p-6 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-base font-medium text-gray-900">Total Amount</span>
+                            <span class="text-2xl font-bold text-primary-600">${{ payment.amount }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="border-t border-gray-200 pt-6">
+                <div class="text-center text-gray-500 text-sm">
+                    <p>If you have any questions about this receipt, please contact</p>
+                    <p class="font-medium">support@mazadi.com | +1 (555) 123-4567</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receipt Footer -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="text-center text-gray-500 text-sm">
+                <p>&copy; 2023 Mazadi Auctions. All rights reserved.</p>
+                <p class="mt-1">This is an official receipt for your purchase.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Button (only visible if user is buyer or seller) -->
+    <div class="mt-8 text-center no-print">
+        <a href="{% url 'messages_thread' payment.id %}" class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300">
+            <i class="fas fa-comments mr-2"></i> Message {% if request.user == payment.user %}Seller{% else %}Buyer{% endif %}
+        </a>
+        <p class="mt-2 text-sm text-gray-500">
+            Have questions about this transaction? Send a message to the {% if request.user == payment.user %}seller{% else %}buyer{% endif %}.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any receipt-specific JavaScript here
+    });
+</script>
+{% endblock %}
