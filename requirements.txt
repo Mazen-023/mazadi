@@ -1,0 +1,11 @@
+# Django
+Django==5.2.1
+
+# Image processing
+Pillow==11.2.1
+
+# Environment variables
+python-dotenv==1.1.0
+
+# Payment processing
+stripe==12.1.0

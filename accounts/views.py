@@ -5,11 +5,12 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.db import IntegrityError, models
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 
 from .forms import UserProfileForm, CustomPasswordChangeForm, SecurityQuestionForm, CustomUserCreationForm, RatingForm
 from .models import UserProfile, SecurityQuestion, User, Rating
 from auctions.models import Auction
+from payments.models import Payment
 
 
 def register(request):
@@ -73,6 +74,19 @@ def profile_view(request):
     # Get user stats
     auctions_created = user.auctions.count()
 
+    # Get payment stats
+    user_payments = Payment.objects.filter(user=user)
+    payments_made = user_payments.count()
+
+    # Get seller payment stats
+    user_auctions = Auction.objects.filter(user=user)
+    seller_payments = Payment.objects.filter(auction__in=user_auctions)
+    payments_received = seller_payments.count()
+
+    # Calculate total spent and earned
+    total_spent = user_payments.filter(status='completed').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_earned = seller_payments.filter(status='completed').aggregate(Sum('amount'))['amount__sum'] or 0
+
     # Update profile stats
     profile.auctions_created = auctions_created
     profile.save()
@@ -80,6 +94,10 @@ def profile_view(request):
     context = {
         'user': user,
         'profile': profile,
+        'payments_made': payments_made,
+        'payments_received': payments_received,
+        'total_spent': total_spent,
+        'total_earned': total_earned,
     }
     return render(request, 'accounts/profile.html', context)
 

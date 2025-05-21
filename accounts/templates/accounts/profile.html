@@ -63,6 +63,17 @@
                             <i class="fas fa-heart mr-3 text-gray-400 group-hover:text-primary-500"></i>
                             Watchlist
                         </a>
+
+                        <div class="border-t border-gray-200 my-2"></div>
+
+                        <a href="{% url 'payment_history' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
+                            <i class="fas fa-credit-card mr-3 text-gray-400 group-hover:text-primary-500"></i>
+                            My Payments
+                        </a>
+                        <a href="{% url 'seller_payments' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
+                            <i class="fas fa-dollar-sign mr-3 text-gray-400 group-hover:text-primary-500"></i>
+                            Seller Payments
+                        </a>
                     </nav>
                 </div>
             </div>
@@ -142,10 +153,90 @@
                         </div>
                     </div>
 
+                    <!-- Payment Stats -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-8">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Statistics</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                                <p class="text-3xl font-bold text-primary-600">{{ payments_made }}</p>
+                                <p class="text-sm text-gray-500">Payments Made</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                                <p class="text-3xl font-bold text-green-600">${{ total_spent|floatformat:2 }}</p>
+                                <p class="text-sm text-gray-500">Total Spent</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                                <p class="text-3xl font-bold text-secondary-600">{{ payments_received }}</p>
+                                <p class="text-sm text-gray-500">Payments Received</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                                <p class="text-3xl font-bold text-green-600">${{ total_earned|floatformat:2 }}</p>
+                                <p class="text-sm text-gray-500">Total Earned</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Bio -->
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="bg-gray-50 p-4 rounded-lg mb-8">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">About Me</h3>
                         <p class="text-gray-700">{{ profile.bio|default:"No bio provided yet." }}</p>
+                    </div>
+
+                    <!-- Payment Activity -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">Recent Payment Activity</h3>
+                            <a href="{% url 'payment_history' %}" class="text-sm text-primary-600 hover:text-primary-800 transition-colors duration-300">
+                                View All <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+
+                        {% with recent_payments=user.payment_set.all|slice:":3" %}
+                            {% if recent_payments %}
+                                <div class="space-y-4">
+                                    {% for payment in recent_payments %}
+                                        <div class="bg-white p-3 rounded-lg shadow-sm flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
+                                                    {% if payment.auction.image %}
+                                                        <img src="{{ payment.auction.image.url }}" alt="{{ payment.auction.title }}" class="h-10 w-10 object-contain">
+                                                    {% elif payment.auction.image_url %}
+                                                        <img src="{{ payment.auction.image_url }}" alt="{{ payment.auction.title }}" class="h-10 w-10 object-contain">
+                                                    {% else %}
+                                                        <div class="h-10 w-10 flex items-center justify-center">
+                                                            <i class="fas fa-image text-gray-400"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900 truncate max-w-xs">{{ payment.auction.title }}</p>
+                                                    <p class="text-xs text-gray-500">{{ payment.created_at|date:"M d, Y" }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="text-sm font-semibold text-gray-900">${{ payment.amount }}</span>
+                                                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                    {% if payment.status == 'completed' %}bg-green-100 text-green-800
+                                                    {% elif payment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                    {{ payment.status|title }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="bg-white p-6 rounded-lg text-center">
+                                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4">
+                                        <i class="fas fa-receipt text-gray-400 text-xl"></i>
+                                    </div>
+                                    <p class="text-gray-500 mb-4">You haven't made any payments yet.</p>
+                                    <a href="{% url 'index' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        <i class="fas fa-search mr-2"></i> Browse Auctions
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
                     </div>
                 </div>
             </div>

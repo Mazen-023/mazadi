@@ -22,7 +22,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("auctions.urls")),
     path("accounts/", include("accounts.urls")),
-    path("notifications/", include("notifications.urls"))
+    path("notifications/", include("notifications.urls")),
+    path("payments/", include("payments.urls"))
 ]
 
 # Add media files serving in development

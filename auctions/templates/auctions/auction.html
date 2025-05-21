@@ -386,9 +386,29 @@
                             <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded mt-3 animate-pulse-slow">
                                 <p class="text-sm text-red-600 flex items-center">
                                     <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    Warning: Close and actions cannot be undone.
+                                    Warning: Close and delete actions cannot be undone.
                                 </p>
                             </div>
+                        {% endif %}
+
+                        <!-- Payment Button (For Auction Winner) -->
+                        {% if auction.is_close and user.is_authenticated %}
+                            {% with highest_bid=auction.bids.all|dictsort:"amount"|last %}
+                                {% if highest_bid.user.id == user.id %}
+                                    <div class="mt-4">
+                                        <a href="{% url 'payment_process' auction.id %}" class="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 group">
+                                            <i class="fas fa-credit-card mr-2 transition-transform duration-300 group-hover:rotate-12"></i> Pay Now
+                                        </a>
+
+                                        <div class="bg-green-50 border-l-4 border-green-500 p-3 rounded mt-3">
+                                            <p class="text-sm text-green-600 flex items-center">
+                                                <i class="fas fa-info-circle mr-2"></i>
+                                                Congratulations! You won this auction. Complete your purchase now.
+                                            </p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
                         {% endif %}
                     </div>
                 </div>
