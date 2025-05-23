@@ -9,3 +9,11 @@ python-dotenv==1.1.0
 
 # Payment processing
 stripe==12.1.0
+
+# AI/ML dependencies for chatbot
+torch
+transformers
+sentence-transformers
+scikit-learn
+nltk
+numpy

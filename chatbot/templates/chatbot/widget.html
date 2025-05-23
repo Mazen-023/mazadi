@@ -1,0 +1,296 @@
+{% load static %}
+<!-- Chat Widget - Can be embedded in any page -->
+<div id="chat-widget" class="fixed bottom-4 right-4 z-50">
+    <!-- Chat Toggle Button -->
+    <button id="chat-toggle" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110">
+        <i class="fas fa-comments text-xl"></i>
+        <span id="chat-notification" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center hidden">!</span>
+    </button>
+    
+    <!-- Chat Window -->
+    <div id="chat-window" class="hidden absolute bottom-16 right-0 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col">
+        <!-- Chat Header -->
+        <div class="bg-blue-500 text-white p-4 rounded-t-lg flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-robot"></i>
+                <span class="font-semibold">Smart Assistant</span>
+            </div>
+            <div class="flex space-x-2">
+                <button id="chat-minimize" class="text-white hover:text-gray-200">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button id="chat-close" class="text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Chat Messages -->
+        <div id="widget-chat-messages" class="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
+            <!-- Welcome Message -->
+            <div class="flex items-start space-x-2">
+                <div class="bg-blue-500 text-white p-1 rounded-full flex-shrink-0">
+                    <i class="fas fa-robot text-xs"></i>
+                </div>
+                <div class="bg-white p-2 rounded-lg shadow-sm text-sm max-w-xs">
+                    <p class="text-gray-800">مرحباً! كيف يمكنني مساعدتك؟</p>
+                    <p class="text-gray-800 mt-1">Hello! How can I help you?</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Input -->
+        <div class="border-t p-3">
+            <form id="widget-chat-form" class="flex space-x-2">
+                <input 
+                    type="text" 
+                    id="widget-message-input" 
+                    placeholder="Type your message..."
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    autocomplete="off"
+                >
+                <button 
+                    type="submit" 
+                    id="widget-send-button"
+                    class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                    <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+            </form>
+            
+            <!-- Widget Typing Indicator -->
+            <div id="widget-typing-indicator" class="hidden mt-2 flex items-center space-x-2 text-gray-500">
+                <div class="flex space-x-1">
+                    <div class="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div class="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                    <div class="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
+                <span class="text-xs">AI is typing...</span>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="border-t p-2">
+            <div class="flex flex-wrap gap-1">
+                <button class="widget-quick-question bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-xs transition-colors" data-question="كيف أسجل؟">
+                    تسجيل
+                </button>
+                <button class="widget-quick-question bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-xs transition-colors" data-question="كيف أزايد؟">
+                    مزايدة
+                </button>
+                <button class="widget-quick-question bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-xs transition-colors" data-question="الدفع">
+                    دفع
+                </button>
+                <a href="{% url 'chatbot:chat' %}" class="bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded text-xs transition-colors text-blue-600">
+                    Full Chat
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Widget Styles -->
+<style>
+#chat-widget {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#chat-widget .widget-message {
+    animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#chat-widget .user-message-widget {
+    margin-left: auto;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 4px 12px;
+    max-width: 70%;
+}
+
+#chat-widget .bot-message-widget {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px 12px 12px 4px;
+    max-width: 70%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#widget-chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+#widget-chat-messages::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+#widget-chat-messages::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+</style>
+
+<!-- Widget JavaScript -->
+<script>
+class ChatWidget {
+    constructor() {
+        this.sessionId = 'widget_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        this.isOpen = false;
+        this.initializeWidget();
+    }
+    
+    initializeWidget() {
+        // Get elements
+        this.chatToggle = document.getElementById('chat-toggle');
+        this.chatWindow = document.getElementById('chat-window');
+        this.chatClose = document.getElementById('chat-close');
+        this.chatMinimize = document.getElementById('chat-minimize');
+        this.messagesContainer = document.getElementById('widget-chat-messages');
+        this.messageInput = document.getElementById('widget-message-input');
+        this.sendButton = document.getElementById('widget-send-button');
+        this.chatForm = document.getElementById('widget-chat-form');
+        this.typingIndicator = document.getElementById('widget-typing-indicator');
+        
+        // Event listeners
+        this.chatToggle.addEventListener('click', () => this.toggleChat());
+        this.chatClose.addEventListener('click', () => this.closeChat());
+        this.chatMinimize.addEventListener('click', () => this.closeChat());
+        
+        this.chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.sendMessage();
+        });
+        
+        // Quick questions
+        document.querySelectorAll('.widget-quick-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const question = button.getAttribute('data-question');
+                this.messageInput.value = question;
+                this.sendMessage();
+            });
+        });
+    }
+    
+    toggleChat() {
+        if (this.isOpen) {
+            this.closeChat();
+        } else {
+            this.openChat();
+        }
+    }
+    
+    openChat() {
+        this.chatWindow.classList.remove('hidden');
+        this.isOpen = true;
+        this.messageInput.focus();
+    }
+    
+    closeChat() {
+        this.chatWindow.classList.add('hidden');
+        this.isOpen = false;
+    }
+    
+    async sendMessage() {
+        const message = this.messageInput.value.trim();
+        if (!message) return;
+        
+        this.addUserMessage(message);
+        this.messageInput.value = '';
+        this.showTypingIndicator();
+        
+        try {
+            const response = await fetch('/chatbot/api/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    session_id: this.sessionId
+                })
+            });
+            
+            const data = await response.json();
+            this.hideTypingIndicator();
+            
+            if (data.success) {
+                this.addBotMessage(data.response);
+            } else {
+                this.addBotMessage('Sorry, I encountered an error.');
+            }
+        } catch (error) {
+            this.hideTypingIndicator();
+            this.addBotMessage('Connection error. Please try again.');
+        }
+    }
+    
+    addUserMessage(message) {
+        const messageElement = this.createWidgetMessage(message, 'user');
+        this.messagesContainer.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+    
+    addBotMessage(message) {
+        const messageElement = this.createWidgetMessage(message, 'bot');
+        this.messagesContainer.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+    
+    createWidgetMessage(message, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'widget-message flex items-start space-x-2 mb-2';
+        
+        const isUser = type === 'user';
+        if (isUser) {
+            messageDiv.className += ' flex-row-reverse space-x-reverse';
+        }
+        
+        const avatar = document.createElement('div');
+        avatar.className = `${isUser ? 'bg-purple-500' : 'bg-blue-500'} text-white p-1 rounded-full flex-shrink-0`;
+        avatar.innerHTML = `<i class="fas ${isUser ? 'fa-user' : 'fa-robot'} text-xs"></i>`;
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = `${isUser ? 'user-message-widget' : 'bot-message-widget'} p-2 rounded-lg text-sm`;
+        messageContent.innerHTML = `<p class="text-gray-800 ${isUser ? 'text-white' : ''}">${message}</p>`;
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(messageContent);
+        
+        return messageDiv;
+    }
+    
+    showTypingIndicator() {
+        this.typingIndicator.classList.remove('hidden');
+        this.scrollToBottom();
+    }
+    
+    hideTypingIndicator() {
+        this.typingIndicator.classList.add('hidden');
+    }
+    
+    scrollToBottom() {
+        setTimeout(() => {
+            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        }, 100);
+    }
+}
+
+// Initialize widget when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        new ChatWidget();
+    });
+} else {
+    new ChatWidget();
+}
+</script>

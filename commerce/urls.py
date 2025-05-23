@@ -24,7 +24,8 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("notifications/", include("notifications.urls")),
     path("payments/", include("payments.urls")),
-    path("messages/", include("messaging.urls"))
+    path("messages/", include("messaging.urls")),
+    path("chatbot/", include("chatbot.urls"))
 ]
 
 # Add media files serving in development

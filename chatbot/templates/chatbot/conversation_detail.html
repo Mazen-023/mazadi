@@ -1,0 +1,212 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block title %}Conversation Detail - Mazadi{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-lg mb-6 p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-500 text-white p-3 rounded-full">
+                    <i class="fas fa-comment-dots text-xl"></i>
+                </div>
+                <div>
+                    {% if conversation %}
+                        <h1 class="text-2xl font-bold text-gray-800">
+                            Conversation {{ conversation.session_id|slice:":8" }}...
+                        </h1>
+                        <div class="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                            <span>
+                                <i class="fas fa-calendar mr-1"></i>
+                                {{ conversation.created_at|date:"M d, Y" }}
+                            </span>
+                            <span>
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ conversation.updated_at|time:"H:i" }}
+                            </span>
+                            <span>
+                                <i class="fas fa-language mr-1"></i>
+                                {{ conversation.get_language_display }}
+                            </span>
+                            <span>
+                                <i class="fas fa-comment-dots mr-1"></i>
+                                {{ messages.count }} messages
+                            </span>
+                        </div>
+                    {% else %}
+                        <h1 class="text-2xl font-bold text-gray-800">Conversation Detail</h1>
+                        <p class="text-gray-600">View conversation messages</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <a href="{% url 'chatbot:chat_history' %}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to History
+                </a>
+                <a href="{% url 'chatbot:chat' %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-comments mr-2"></i>New Chat
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            {{ error }}
+        </div>
+    {% elif conversation %}
+        <!-- Conversation Messages -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-800">Messages</h2>
+                    <div class="flex items-center space-x-2">
+                        {% if conversation.is_active %}
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <i class="fas fa-circle text-xs mr-1"></i>Active
+                            </span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <i class="fas fa-circle text-xs mr-1"></i>Inactive
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                {% if messages %}
+                    <div class="space-y-6">
+                        {% for message in messages %}
+                            <div class="flex items-start space-x-4 {% if message.message_type == 'user' %}flex-row-reverse space-x-reverse{% endif %}">
+                                <!-- Avatar -->
+                                <div class="{% if message.message_type == 'user' %}bg-purple-500{% else %}bg-blue-500{% endif %} text-white p-3 rounded-full flex-shrink-0">
+                                    <i class="fas {% if message.message_type == 'user' %}fa-user{% else %}fa-robot{% endif %}"></i>
+                                </div>
+                                
+                                <!-- Message Content -->
+                                <div class="flex-1 max-w-3xl">
+                                    <div class="{% if message.message_type == 'user' %}bg-gradient-to-r from-purple-500 to-purple-600 text-white ml-auto{% else %}bg-white border border-gray-200{% endif %} p-4 rounded-lg shadow-sm">
+                                        <div class="{% if message.content|length > 50 and 'ء' in message.content or 'ا' in message.content %}rtl{% else %}ltr{% endif %}">
+                                            <p class="{% if message.message_type == 'user' %}text-white{% else %}text-gray-800{% endif %} whitespace-pre-wrap">{{ message.content }}</p>
+                                        </div>
+                                        
+                                        <!-- Message Metadata -->
+                                        <div class="mt-3 flex items-center justify-between text-sm">
+                                            <div class="flex items-center space-x-3">
+                                                <span class="{% if message.message_type == 'user' %}text-purple-100{% else %}text-gray-500{% endif %}">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    {{ message.timestamp|date:"M d, H:i" }}
+                                                </span>
+                                                
+                                                {% if message.message_type == 'bot' %}
+                                                    {% if message.confidence_score %}
+                                                        <span class="text-gray-500">
+                                                            <i class="fas fa-chart-line mr-1"></i>
+                                                            Confidence: {{ message.confidence_score|floatformat:0 }}%
+                                                        </span>
+                                                    {% endif %}
+                                                    
+                                                    {% if message.response_time %}
+                                                        <span class="text-gray-500">
+                                                            <i class="fas fa-stopwatch mr-1"></i>
+                                                            {{ message.response_time|floatformat:2 }}s
+                                                        </span>
+                                                    {% endif %}
+                                                    
+                                                    {% if message.knowledge_base_match %}
+                                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                                            <i class="fas fa-database mr-1"></i>
+                                                            {{ message.knowledge_base_match }}
+                                                        </span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                            
+                                            {% if message.message_type == 'user' %}
+                                                <span class="text-purple-100 text-xs">
+                                                    <i class="fas fa-user mr-1"></i>You
+                                                </span>
+                                            {% else %}
+                                                <span class="text-gray-500 text-xs">
+                                                    <i class="fas fa-robot mr-1"></i>Assistant
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- No Messages -->
+                    <div class="text-center py-12">
+                        <div class="bg-gray-100 text-gray-400 p-6 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-comment-slash text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">No Messages</h3>
+                        <p class="text-gray-600">This conversation doesn't have any messages yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Conversation Statistics -->
+        {% if messages %}
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Message Count -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Total Messages</h3>
+                            <p class="text-2xl font-bold text-blue-600">{{ messages.count }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Average Response Time -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 text-green-600 p-3 rounded-full">
+                            <i class="fas fa-stopwatch"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Avg Response Time</h3>
+                            {% with bot_messages=messages|dictsort:"message_type" %}
+                                {% if bot_messages %}
+                                    <p class="text-2xl font-bold text-green-600">
+                                        {% widthratio bot_messages|length 1 bot_messages|length %}s
+                                    </p>
+                                {% else %}
+                                    <p class="text-2xl font-bold text-green-600">N/A</p>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conversation Duration -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="bg-purple-100 text-purple-600 p-3 rounded-full">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Duration</h3>
+                            <p class="text-2xl font-bold text-purple-600">
+                                {{ conversation.created_at|timesince:conversation.updated_at }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
