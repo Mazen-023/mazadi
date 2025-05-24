@@ -59,9 +59,9 @@
                     <h3 class="text-sm font-medium text-red-800">This auction has ended</h3>
                     <div class="mt-1 text-sm text-red-700">
                         {% if user.id == bid.user.id %}
-                            Congratulations! You won this auction with a bid of ${{ bid.amount }}.
+                            Congratulations! You won this auction with a bid of EGP{{ bid.amount }}.
                         {% else %}
-                            This auction was won by {{ bid.user.username }} with a bid of ${{ bid.amount }}.
+                            This auction was won by {{ bid.user.username }} with a bid of EGP{{ bid.amount }}.
                         {% endif %}
                     </div>
                 </div>
@@ -94,7 +94,7 @@
             <div class="ml-3">
                 <h3 class="text-sm font-medium text-green-800">Active Auction</h3>
                 <div class="mt-1 text-sm text-green-700">
-                    This auction is currently active. Current bid: ${{ bid.amount }}
+                    This auction is currently active. Current bid: EGP{{ bid.amount }}
                 </div>
             </div>
         </div>
@@ -128,10 +128,10 @@
                         {% endif %}
 
                         <!-- Zoom Lens -->
-                        <div id="zoom-lens" class="hidden absolute border-2 border-primary-300 bg-white bg-opacity-20 pointer-events-none"></div>
+                        <div id="zoom-lens" class="hidden absolute border-2 border-primary-500 bg-primary-100 bg-opacity-30 pointer-events-none rounded-lg shadow-lg backdrop-blur-sm"></div>
 
                         <!-- Zoom Result -->
-                        <div id="zoom-result" class="hidden absolute top-0 left-0 right-0 bottom-0 bg-contain bg-no-repeat bg-center z-10"></div>
+                        <div id="zoom-result" class="hidden absolute top-0 left-0 right-0 bottom-0 bg-contain bg-no-repeat bg-center z-10 rounded-lg shadow-2xl border border-gray-300"></div>
                     </div>
 
                     <!-- Status Badge -->
@@ -144,9 +144,9 @@
                     </div>
 
                     <!-- Zoom Instructions -->
-                    <div class="absolute bottom-4 left-4 z-20 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-md flex items-center">
-                        <i class="fas fa-search-plus mr-1"></i>
-                        <span>Click to zoom</span>
+                    <div class="absolute bottom-4 left-4 z-20 bg-black bg-opacity-70 text-white text-xs px-3 py-2 rounded-lg flex items-center backdrop-blur-sm transition-all duration-300 hover:bg-opacity-80">
+                        <i class="fas fa-search-plus mr-2 text-primary-300"></i>
+                        <span>Click to zoom • Move to explore</span>
                     </div>
                 </div>
 
@@ -258,7 +258,7 @@
 
                     <!-- Price -->
                     <div class="flex items-baseline mb-6 group">
-                        <span class="text-3xl font-bold text-primary-600 transition-all duration-300 group-hover:scale-105">${{ auction.price }}</span>
+                        <span class="text-3xl font-bold text-primary-600 transition-all duration-300 group-hover:scale-105">EGP{{ auction.price }}</span>
                         <span class="ml-2 text-sm text-gray-500">Current Price</span>
                     </div>
 
@@ -268,7 +268,7 @@
                             <span class="text-gray-700 font-medium flex items-center">
                                 <i class="fas fa-gavel text-primary-500 mr-2"></i>Current Bid:
                             </span>
-                            <span class="text-lg font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full">${{ bid.amount }}</span>
+                            <span class="text-lg font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full">EGP{{ bid.amount }}</span>
                         </div>
                         <div class="flex justify-between items-center mb-4">
                             <span class="text-gray-700 font-medium flex items-center">
@@ -288,7 +288,7 @@
                                 <div class="relative group">
                                     {{ BidForm }}
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span class="text-gray-500 sm:text-sm">$</span>
+                                        <span class="text-gray-500 sm:text-sm">EGP</span>
                                     </div>
                                     <div class="absolute inset-0 border border-gray-300 border-opacity-0 rounded-md group-focus-within:border-primary-500 group-focus-within:border-opacity-100 transition-all duration-300 pointer-events-none"></div>
                                 </div>
@@ -542,18 +542,17 @@
                             <div class="flex justify-end mb-4">
                                 <div class="bg-primary-50 px-3 py-1 rounded-full">
                                     <span class="text-lg font-bold text-primary-700 group-hover:text-primary-800 transition-colors duration-300 inline-block transform group-hover:scale-110 transition-transform">
-                                        ${{ related.price }}
+                                        EGP{{ related.price }}
                                     </span>
                                 </div>
                             </div>
 
                             <!-- CTA Button with enhanced hover effect -->
-                            <a href="{% url 'auction' related.id %}" class="relative overflow-hidden block w-full text-center px-4 py-3 border-2 border-primary-600 text-primary-600 rounded-md bg-transparent hover:text-white transition-all duration-300 group-hover:shadow-md">
-                                <span class="relative z-10 flex items-center justify-center">
+                            <a href="{% url 'auction' related.id %}" class="relative overflow-hidden block w-full text-center px-4 py-3 border-2 border-primary-600 text-primary-600 rounded-md bg-transparent group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 group-hover:shadow-lg group-hover:border-primary-700 transform group-hover:scale-105">
+                                <span class="relative z-10 flex items-center justify-center font-medium">
                                     <span>View Details</span>
                                     <i class="fas fa-arrow-right ml-2 transform transition-transform duration-300 group-hover:translate-x-1"></i>
                                 </span>
-                                <div class="absolute inset-0 w-full h-full bg-primary-600 transform -translate-y-full transition-transform duration-300 group-hover:translate-y-0"></div>
                             </a>
                         </div>
                     </div>
@@ -575,56 +574,6 @@
 
 {% block scripts %}
 <script>
-    // Function to get category-specific placeholder images focused on electronics
-    function getPlaceholderImage(category) {
-        // Convert category to lowercase for case-insensitive matching
-        const categoryLower = category.toLowerCase();
-
-        // Electronics-focused category map with high-quality images
-        const categoryMap = {
-            // Main electronics categories
-            'smartphones': 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'tablets': 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'laptops': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'desktops': 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'monitors': 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'tvs': 'https://images.unsplash.com/photo-1593784991095-a205069470b6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'cameras': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'audio': 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'gaming': 'https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'accessories': 'https://images.unsplash.com/photo-1625480860249-be231d9b1bbd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'wearables': 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'networking': 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'storage': 'https://images.unsplash.com/photo-1597226051193-c5a5b5b4d24c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'components': 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-
-            // Generic categories (non-electronics)
-            'electronics': 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'fashion': 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'home': 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'collectibles': 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'art': 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'sports': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'toys': 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'books': 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'jewelry': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'vehicles': 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'other': 'https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-        };
-
-        // Electronics-focused default placeholders
-        const defaultPlaceholders = [
-            'https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Tech workspace
-            'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Laptop and phone
-            'https://images.unsplash.com/photo-1588508065123-287b28e013da?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Electronics on desk
-            'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'  // Computer setup
-        ];
-
-        // Try to match the category (case-insensitive)
-        return categoryMap[categoryLower] || defaultPlaceholders[Math.floor(Math.random() * defaultPlaceholders.length)];
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         // Get elements
         const container = document.getElementById('image-container');
@@ -718,14 +667,21 @@
             // Get cursor position
             const pos = getCursorPos(e);
 
-            // Calculate lens position
+            // Get container dimensions
+            const containerRect = container.getBoundingClientRect();
+            const imgRect = img.getBoundingClientRect();
+
+            // Calculate lens position relative to the image
             let x = pos.x - (lensWidth / 2);
             let y = pos.y - (lensHeight / 2);
 
-            // Prevent lens from going outside the image
-            if (x > img.width - lensWidth) x = img.width - lensWidth;
+            // Prevent lens from going outside the image bounds
+            const maxX = imgRect.width - lensWidth;
+            const maxY = imgRect.height - lensHeight;
+
+            if (x > maxX) x = maxX;
             if (x < 0) x = 0;
-            if (y > img.height - lensHeight) y = img.height - lensHeight;
+            if (y > maxY) y = maxY;
             if (y < 0) y = 0;
 
             // Set lens position
@@ -739,8 +695,9 @@
             const bgX = x * ratio;
             const bgY = y * ratio;
 
-            result.style.backgroundSize = (img.width * ratio) + 'px ' + (img.height * ratio) + 'px';
-            result.style.backgroundPosition = '-' + bgX + 'px ' + '-' + bgY + 'px';
+            // Set background properties for zoom result
+            result.style.backgroundSize = (imgRect.width * ratio) + 'px ' + (imgRect.height * ratio) + 'px';
+            result.style.backgroundPosition = '-' + bgX + 'px -' + bgY + 'px';
         }
 
         // Get cursor position relative to image
