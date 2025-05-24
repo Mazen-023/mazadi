@@ -1,6 +1,6 @@
 # Create venv venv and activate it
 python -m venv venv
-source venv/bin/activate
+venv\Scripts\activate.bat
 
 # Install dependencies
 pip install -r requirements.txt
