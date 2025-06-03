@@ -3,6 +3,8 @@ from .models import Auction, Watchlist, Bid, Comment
 
 class AuctionAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "description", "price", "category", "user", "created_at")
+    list_filter = ("category", "is_close")
+    search_fields = ("title", "description")
 
 
 class BidAdmin(admin.ModelAdmin):

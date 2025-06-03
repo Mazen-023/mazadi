@@ -108,6 +108,9 @@
                     <p class="mt-1 text-xs text-gray-500">Provide a detailed description of your item, including condition, features, and any relevant details.</p>
                 </div>
 
+                <!-- Price Estimation Widget -->
+                {% include 'price_estimation/price_estimate_widget.html' %}
+
                 <!-- Price Field -->
                 <div>
                     <label for="{{ form.price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
@@ -257,5 +260,43 @@
             });
         }
     });
+
+    // Starting Bid Auto-calculation Logic (inspired by main directory implementation)
+    const priceInput = document.getElementById("{{ form.price.id_for_label }}");
+    const amountInput = document.getElementById("{{ form.amount.id_for_label }}");
+
+    // Function to calculate 95% of price for starting bid
+    function updateStartingBid() {
+        const price = parseFloat(priceInput.value);
+        if (!isNaN(price) && price > 0) {
+            const startingBid = (price * 0.95).toFixed(2);
+            amountInput.value = startingBid;
+
+            // Add visual feedback
+            amountInput.style.backgroundColor = '#f0f9ff';
+            setTimeout(() => {
+                amountInput.style.backgroundColor = '';
+            }, 1000);
+        } else {
+            amountInput.value = '';
+        }
+    }
+
+    // Auto-update starting bid when price changes
+    if (priceInput && amountInput) {
+        priceInput.addEventListener('input', updateStartingBid);
+        priceInput.addEventListener('change', updateStartingBid);
+
+        // Also update when price estimation widget updates the price
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                    updateStartingBid();
+                }
+            });
+        });
+
+        observer.observe(priceInput, { attributes: true });
+    }
 </script>
 {% endblock %}

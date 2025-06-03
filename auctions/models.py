@@ -29,7 +29,7 @@ CATEGORY_CHOICES = [
 class Auction(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField()
-    price = models.DecimalField(decimal_places=2, max_digits=6)
+    price = models.DecimalField(decimal_places=2, max_digits=10)  # Increased from 6 to 10 to handle larger prices
     category = models.CharField(max_length=64, choices=CATEGORY_CHOICES, default='other')
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='auction_images/', null=True, blank=True)
@@ -39,6 +39,38 @@ class Auction(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.price})"
+
+    @property
+    def has_price_estimate(self):
+        """Check if auction has a price estimate."""
+        return hasattr(self, 'price_estimations') and self.price_estimations.exists()
+
+    @property
+    def latest_price_estimate(self):
+        """Get the latest price estimation for this auction."""
+        if hasattr(self, 'price_estimations'):
+            return self.price_estimations.first()
+        return None
+
+    @property
+    def price_vs_estimate_percentage(self):
+        """Calculate percentage difference between set price and estimated price."""
+        try:
+            latest_estimate = self.latest_price_estimate
+            if not latest_estimate or not latest_estimate.estimated_price:
+                return None
+
+            # Safely convert to float with error handling
+            auction_price = float(self.price)
+            estimated_price = float(latest_estimate.estimated_price)
+
+            if estimated_price == 0:
+                return None
+
+            return round(((auction_price - estimated_price) / estimated_price) * 100, 1)
+        except (ValueError, TypeError, AttributeError, Exception):
+            # Return None if any conversion fails
+            return None
 
 
 # Watchlist model
@@ -53,7 +85,7 @@ class Watchlist(models.Model):
 
 # Bid model
 class Bid(models.Model):
-    amount = models.DecimalField(decimal_places=2, max_digits=6)
+    amount = models.DecimalField(decimal_places=2, max_digits=10)  # Increased from 6 to 10 to handle larger bids
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="bids", null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids", null=True)
 

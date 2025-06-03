@@ -1,0 +1,232 @@
+<!-- Price Estimation Widget -->
+<div id="price-estimation-widget" class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-medium text-gray-900">
+            <i class="fas fa-chart-line text-blue-500 mr-2"></i>
+            Price Estimation
+        </h3>
+        <button 
+            type="button" 
+            id="estimate-price-btn" 
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            <i class="fas fa-search mr-1"></i>
+            Get Price Estimate
+        </button>
+    </div>
+    
+    <!-- Estimation Results -->
+    <div id="estimation-results" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <!-- Amazon Price -->
+            <div class="bg-white p-3 rounded border">
+                <div class="text-sm text-gray-600">Amazon Egypt</div>
+                <div id="amazon-price" class="text-lg font-semibold text-gray-900">-</div>
+            </div>
+            
+            <!-- Dubizzle Price -->
+            <div class="bg-white p-3 rounded border">
+                <div class="text-sm text-gray-600">Dubizzle Egypt</div>
+                <div id="dubizzle-price" class="text-lg font-semibold text-gray-900">-</div>
+            </div>
+            
+            <!-- Estimated Price -->
+            <div class="bg-blue-50 p-3 rounded border border-blue-200">
+                <div class="text-sm text-blue-600">Estimated Price</div>
+                <div id="estimated-price" class="text-lg font-bold text-blue-700">-</div>
+            </div>
+        </div>
+        
+        <!-- Sources and Actions -->
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                <span>Sources: </span>
+                <span id="sources-used" class="font-medium">-</span>
+            </div>
+            <button 
+                type="button" 
+                id="use-estimated-price" 
+                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200"
+            >
+                Use This Price
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="estimation-loading" class="hidden text-center py-4">
+        <div class="inline-flex items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-blue-600">Estimating price from multiple sources...</span>
+        </div>
+    </div>
+    
+    <!-- Error State -->
+    <div id="estimation-error" class="hidden bg-red-50 border border-red-200 rounded p-3">
+        <div class="flex">
+            <i class="fas fa-exclamation-triangle text-red-400 mr-2 mt-0.5"></i>
+            <div>
+                <div class="text-sm font-medium text-red-800">Price estimation failed</div>
+                <div id="error-message" class="text-sm text-red-600 mt-1"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Help Text -->
+    <div class="mt-3 text-xs text-gray-500">
+        <i class="fas fa-info-circle mr-1"></i>
+        Price estimates are based on current market data from Amazon Egypt and Dubizzle Egypt. 
+        Use these as a reference to set competitive prices for your auction.
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const estimateBtn = document.getElementById('estimate-price-btn');
+    const resultsDiv = document.getElementById('estimation-results');
+    const loadingDiv = document.getElementById('estimation-loading');
+    const errorDiv = document.getElementById('estimation-error');
+    const useEstimatedPriceBtn = document.getElementById('use-estimated-price');
+    
+    // Form fields
+    const titleField = document.querySelector('input[name="title"]');
+    const descriptionField = document.querySelector('textarea[name="description"]');
+    const priceField = document.querySelector('input[name="price"]');
+    
+    let currentEstimate = null;
+    
+    estimateBtn.addEventListener('click', function() {
+        const title = titleField?.value?.trim();
+        const description = descriptionField?.value?.trim();
+        
+        if (!title || !description) {
+            showError('Please enter both title and description before estimating price.');
+            return;
+        }
+        
+        estimatePrice(title, description);
+    });
+    
+    useEstimatedPriceBtn.addEventListener('click', function() {
+        if (currentEstimate && priceField) {
+            priceField.value = currentEstimate.toFixed(2);
+            priceField.focus();
+
+            // Trigger starting bid calculation if the function exists
+            if (typeof updateStartingBid === 'function') {
+                updateStartingBid();
+            }
+
+            // Also trigger input event for any other listeners
+            priceField.dispatchEvent(new Event('input', { bubbles: true }));
+            priceField.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // Show success message
+            showSuccess('Price updated with estimated value! Starting bid automatically calculated.');
+        }
+    });
+    
+    function estimatePrice(name, description) {
+        // Show loading state
+        hideAllStates();
+        loadingDiv.classList.remove('hidden');
+        estimateBtn.disabled = true;
+        
+        // Make AJAX request
+        fetch('/price-estimation/estimate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideAllStates();
+            estimateBtn.disabled = false;
+            
+            if (data.success) {
+                showResults(data);
+            } else {
+                showError(data.error || 'Failed to estimate price');
+            }
+        })
+        .catch(error => {
+            hideAllStates();
+            estimateBtn.disabled = false;
+            showError('Network error. Please try again.');
+            console.error('Price estimation error:', error);
+        });
+    }
+    
+    function showResults(data) {
+        currentEstimate = data.estimated_price;
+        
+        // Update price displays
+        document.getElementById('amazon-price').textContent = 
+            data.amazon_price ? `${data.amazon_price} EGP` : 'Not available';
+        document.getElementById('dubizzle-price').textContent = 
+            data.dubizzle_price ? `${data.dubizzle_price} EGP` : 'Not available';
+        document.getElementById('estimated-price').textContent = 
+            data.estimated_price ? `${data.estimated_price} EGP` : 'Not available';
+        document.getElementById('sources-used').textContent = 
+            data.sources_used.length > 0 ? data.sources_used.join(', ') : 'None';
+        
+        // Show/hide use price button
+        useEstimatedPriceBtn.style.display = data.estimated_price ? 'block' : 'none';
+        
+        resultsDiv.classList.remove('hidden');
+        
+        // Show warnings if any
+        if (data.warnings && data.warnings.length > 0) {
+            showWarning('Some sources had issues: ' + data.warnings.join(', '));
+        }
+    }
+    
+    function hideAllStates() {
+        resultsDiv.classList.add('hidden');
+        loadingDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+    }
+    
+    function showError(message) {
+        document.getElementById('error-message').textContent = message;
+        errorDiv.classList.remove('hidden');
+    }
+    
+    function showSuccess(message) {
+        // Create and show success toast
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+    
+    function showWarning(message) {
+        // Create and show warning toast
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded shadow-lg z-50';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }
+    
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+});
+</script>
