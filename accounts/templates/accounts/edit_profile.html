@@ -4,20 +4,6 @@
 {% block title %}Edit Profile - Mazadi{% endblock %}
 
 {% block body %}
-<!-- Page Header -->
-<div class="bg-gradient-to-r from-primary-600 to-primary-800 py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <h1 class="text-3xl font-extrabold text-white sm:text-4xl">
-                Edit Your Profile
-            </h1>
-            <p class="mt-3 max-w-2xl mx-auto text-xl text-primary-100">
-                Update your personal information and preferences
-            </p>
-        </div>
-    </div>
-</div>
-
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- Sidebar Navigation -->
@@ -39,12 +25,12 @@
                     </div>
 
                     <nav class="space-y-2">
-                        <a href="{% url 'profile' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
-                            <i class="fas fa-user-circle mr-3 text-gray-400 group-hover:text-primary-500"></i>
+                        <a href="{% url 'profile' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary-50 text-primary-700">
+                            <i class="fas fa-user-circle mr-3 text-primary-500"></i>
                             Profile Overview
                         </a>
-                        <a href="{% url 'edit_profile' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary-50 text-primary-700">
-                            <i class="fas fa-edit mr-3 text-primary-500"></i>
+                        <a href="{% url 'edit_profile' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
+                            <i class="fas fa-edit mr-3 text-gray-400 group-hover:text-primary-500"></i>
                             Edit Profile
                         </a>
                         <a href="{% url 'change_password' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
@@ -62,6 +48,21 @@
                         <a href="{% url 'watchlist' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
                             <i class="fas fa-heart mr-3 text-gray-400 group-hover:text-primary-500"></i>
                             Watchlist
+                        </a>
+
+                        <div class="border-t border-gray-200 my-2"></div>
+
+                        <a href="{% url 'payment_history' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
+                            <i class="fas fa-credit-card mr-3 text-gray-400 group-hover:text-primary-500"></i>
+                            My Payments
+                        </a>
+                        <a href="{% url 'seller_payments' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
+                            <i class="fas fa-dollar-sign mr-3 text-gray-400 group-hover:text-primary-500"></i>
+                            Seller Payments
+                        </a>
+                        <a href="{% url 'messages_inbox' %}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-primary-700 transition-colors duration-300">
+                            <i class="fas fa-comments mr-3 text-gray-400 group-hover:text-primary-500"></i>
+                            Messages
                         </a>
                     </nav>
                 </div>
