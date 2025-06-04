@@ -27,7 +27,12 @@ class EstimationConfig:
         'headphones': ['headphones', 'earphones', 'headset'],
         'speaker': ['speaker', 'speakers'],
         'camera': ['camera', 'كاميرا'],
-        'tv': ['tv', 'television', 'smart tv']
+        'tv': ['tv', 'television', 'smart tv'],
+        'case': ['case', 'pc case', 'computer case', 'tower', 'chassis'],
+        'gpu': ['gpu', 'graphics card', 'video card'],
+        'cpu': ['cpu', 'processor'],
+        'ram': ['ram', 'memory'],
+        'storage': ['ssd', 'hdd', 'hard drive', 'storage']
     }
     
     # Basic price ranges for Egyptian market (in EGP)

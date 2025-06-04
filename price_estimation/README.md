@@ -5,13 +5,14 @@ A Django app for estimating product prices by scraping Amazon Egypt and Dubizzle
 ## Features
 
 - **Multi-source price estimation**: Scrapes Amazon Egypt and Dubizzle Egypt
+- **Real prices only**: No hardcoded or fallback pricing - only actual scraped prices
 - **Intelligent caching**: Avoids repeated API calls with database-backed caching
 - **Similarity matching**: Uses text similarity to find relevant products on Dubizzle
 - **Condition-aware pricing**: Applies discounts for used items
 - **Comprehensive admin interface**: Full admin support with custom actions
 - **Management commands**: CLI tools for bulk operations
 - **RESTful API**: AJAX endpoints for real-time price estimation
-- **Robust error handling**: Graceful degradation when sources fail
+- **Clear error messaging**: Transparent feedback when no prices are found
 
 ## Installation
 
