@@ -7,7 +7,6 @@ import time
 from typing import Union
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 
 from .base import BasePriceEstimator
 from ..utils.web_scraping import WebScrapingUtils
@@ -38,19 +37,13 @@ class DubizzlePriceEstimator(BasePriceEstimator):
         try:
             driver = WebScrapingUtils.get_webdriver()
 
-            # Go to homepage first
-            driver.get("https://www.dubizzle.com.eg")
-            time.sleep(2)
-
-            # Find search box and perform search
-            search_box = driver.find_element(By.CSS_SELECTOR, 'input[type="search"]')
-            search_query = f"{name} {description}".strip()
-
+            # Create a shorter, more focused search query
+            search_query = self._create_search_query(name, description)
             logger.debug(f"Searching Dubizzle for: {search_query}")
 
-            search_box.clear()
-            search_box.send_keys(search_query)
-            search_box.send_keys(Keys.RETURN)
+            # Go directly to search results page instead of using search box
+            search_url = f"https://www.dubizzle.com.eg/ads/q-{search_query.replace(' ', '-')}/"
+            driver.get(search_url)
             time.sleep(4)  # Wait for search results to load
 
             logger.debug(f"Search results URL: {driver.current_url}")
@@ -76,6 +69,36 @@ class DubizzlePriceEstimator(BasePriceEstimator):
         finally:
             if driver:
                 driver.quit()
+
+    def _create_search_query(self, name: str, description: str) -> str:
+        """Create a focused search query for Dubizzle."""
+        # Extract key terms from name and description
+        combined_text = f"{name} {description}".lower()
+
+        # Extract brand names
+        brands = ['iphone', 'samsung', 'dell', 'hp', 'lenovo', 'asus', 'acer', 'apple', 'huawei', 'xiaomi', 'oppo', 'realme', 'honor']
+        found_brand = None
+        for brand in brands:
+            if brand in combined_text:
+                found_brand = brand
+                break
+
+        # Extract model/product type
+        words = name.split()[:3]  # Take first 3 words from name
+
+        # Create focused query
+        if found_brand:
+            query_parts = [found_brand] + [word for word in words if word.lower() != found_brand]
+        else:
+            query_parts = words
+
+        # Limit to 3-4 words maximum
+        search_query = ' '.join(query_parts[:4])
+
+        # Clean up the query
+        search_query = search_query.replace('–', '').replace('-', ' ').strip()
+
+        return search_query
 
     def _extract_prices_from_page(self, driver, name: str, description: str) -> list:
         """Extract prices from Dubizzle search results page."""
@@ -123,15 +146,24 @@ class DubizzlePriceEstimator(BasePriceEstimator):
 
             logger.debug(f"Found listing text: {listing_text[:100]}...")
 
-            # Calculate similarity using the full listing text
-            search_text = f"{name} {description}".lower()
+            # Calculate similarity using a more focused approach
+            search_text = self._create_search_query(name, description).lower()
             similarity = self.text_processor.calculate_similarity(listing_text.lower(), search_text)
 
-            # Use a lower threshold for Dubizzle since listings are more varied
-            dubizzle_threshold = 0.25  # Lower than the default 0.58
+            # Use a much lower threshold for Dubizzle since listings are more varied
+            dubizzle_threshold = 0.15  # Much lower than the default 0.58
             logger.debug(f"Similarity score: {round(similarity, 2)} (threshold: {dubizzle_threshold})")
 
-            if similarity < dubizzle_threshold:
+            # Also check if any key words from search query appear in listing
+            search_words = search_text.split()
+            listing_words = listing_text.lower().split()
+            word_matches = sum(1 for word in search_words if any(word in listing_word for listing_word in listing_words))
+            word_match_ratio = word_matches / len(search_words) if search_words else 0
+
+            logger.debug(f"Word match ratio: {round(word_match_ratio, 2)} ({word_matches}/{len(search_words)} words)")
+
+            # Accept if either similarity is good OR word match ratio is good
+            if similarity < dubizzle_threshold and word_match_ratio < 0.5:
                 return None
 
             logger.debug(f"Matched listing with similarity {round(similarity, 2)}")

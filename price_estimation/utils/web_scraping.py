@@ -47,7 +47,50 @@ class WebScrapingUtils:
         except Exception as e:
             logger.error(f"WebDriver initialization failed: {str(e)}")
             raise
-    
+
+    @staticmethod
+    def get_amazon_webdriver():
+        """Get Chrome WebDriver with enhanced anti-detection for Amazon."""
+        options = Options()
+
+        # Enhanced anti-detection for Amazon
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-plugins")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option('useAutomationExtension', False)
+
+        # Use a more recent user agent
+        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+
+        # Add realistic browser preferences
+        prefs = {
+            "profile.default_content_setting_values": {
+                "popups": 2,  # Block popups
+                "geolocation": 2,  # Block location sharing
+                "notifications": 2,  # Block notifications
+                "media_stream": 2,  # Block media stream
+            }
+        }
+        options.add_experimental_option("prefs", prefs)
+
+        try:
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+
+            # Execute stealth scripts
+            driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            driver.execute_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
+            driver.execute_script("Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']})")
+
+            return driver
+        except Exception as e:
+            logger.error(f"Amazon WebDriver initialization failed: {str(e)}")
+            raise
+
     @staticmethod
     def get_dubizzle_headers():
         """Get headers for Dubizzle requests."""
