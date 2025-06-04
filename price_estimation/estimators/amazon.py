@@ -146,8 +146,8 @@ class AmazonPriceEstimator(BasePriceEstimator):
             search_text = self._create_search_query(name, description).lower()
             similarity = self.text_processor.calculate_similarity(title_text.lower(), search_text)
 
-            # Use a reasonable threshold for Amazon
-            amazon_threshold = 0.3
+            # Use a lower threshold for Amazon (similar to Dubizzle)
+            amazon_threshold = 0.15
             logger.debug(f"Similarity score: {round(similarity, 2)} (threshold: {amazon_threshold})")
 
             if similarity < amazon_threshold:
